@@ -82,10 +82,7 @@ export function ContactContent({ contactInfo }: ContactContentProps) {
   };
 
   return (
-    <section className="min-h-screen bg-black pt-28 pb-20 lg:pt-36 lg:pb-28 relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-zinc-900/50 to-black pointer-events-none" />
-
+    <section className="min-h-screen bg-white pt-28 pb-20 lg:pt-36 lg:pb-28 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
         <motion.div
@@ -97,10 +94,10 @@ export function ContactContent({ contactInfo }: ContactContentProps) {
           <p className="text-zinc-500 text-sm font-medium tracking-wide uppercase mb-4">
             Get in touch
           </p>
-          <h1 className="text-4xl lg:text-6xl font-light text-white leading-[1.1] mb-6">
+          <h1 className="text-4xl lg:text-6xl font-light text-zinc-900 leading-[1.1] mb-6">
             Let's build something amazing together
           </h1>
-          <p className="text-lg text-zinc-400 leading-relaxed">
+          <p className="text-lg text-zinc-600 leading-relaxed">
             Have a project in mind? We'd love to hear about it. Send us a message and we'll get back to you within 24 hours.
           </p>
         </motion.div>
@@ -118,17 +115,17 @@ export function ContactContent({ contactInfo }: ContactContentProps) {
               href={`mailto:${contactInfo.email}`}
               className="group block"
             >
-              <div className="flex items-start gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] hover:border-white/[0.1] transition-all duration-300">
-                <div className="w-11 h-11 rounded-xl bg-white/[0.08] flex items-center justify-center flex-shrink-0">
+              <div className="flex items-start gap-4 p-5 rounded-2xl bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 hover:border-zinc-300 transition-all duration-300">
+                <div className="w-11 h-11 rounded-xl bg-zinc-900 flex items-center justify-center flex-shrink-0">
                   <Mail className="w-5 h-5 text-white" />
                 </div>
                 <div>
                   <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">Email</p>
-                  <p className="text-white font-medium group-hover:text-zinc-300 transition-colors">
+                  <p className="text-zinc-900 font-medium group-hover:text-zinc-700 transition-colors">
                     {contactInfo.email}
                   </p>
                 </div>
-                <ArrowRight className="w-4 h-4 text-zinc-600 ml-auto mt-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="w-4 h-4 text-zinc-400 ml-auto mt-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
               </div>
             </a>
 
@@ -138,29 +135,29 @@ export function ContactContent({ contactInfo }: ContactContentProps) {
                 href={`tel:${contactInfo.phone}`}
                 className="group block"
               >
-                <div className="flex items-start gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.05] hover:border-white/[0.1] transition-all duration-300">
-                  <div className="w-11 h-11 rounded-xl bg-white/[0.08] flex items-center justify-center flex-shrink-0">
+                <div className="flex items-start gap-4 p-5 rounded-2xl bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 hover:border-zinc-300 transition-all duration-300">
+                  <div className="w-11 h-11 rounded-xl bg-zinc-900 flex items-center justify-center flex-shrink-0">
                     <Phone className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">Phone</p>
-                    <p className="text-white font-medium group-hover:text-zinc-300 transition-colors">
+                    <p className="text-zinc-900 font-medium group-hover:text-zinc-700 transition-colors">
                       {contactInfo.phone}
                     </p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-zinc-600 ml-auto mt-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-zinc-400 ml-auto mt-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </div>
               </a>
             )}
 
             {/* Location Card */}
-            <div className="flex items-start gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-              <div className="w-11 h-11 rounded-xl bg-white/[0.08] flex items-center justify-center flex-shrink-0">
+            <div className="flex items-start gap-4 p-5 rounded-2xl bg-zinc-50 border border-zinc-200">
+              <div className="w-11 h-11 rounded-xl bg-zinc-900 flex items-center justify-center flex-shrink-0">
                 <MapPin className="w-5 h-5 text-white" />
               </div>
               <div>
                 <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">Location</p>
-                <p className="text-white font-medium">
+                <p className="text-zinc-900 font-medium">
                   {contactInfo.location}
                 </p>
               </div>
