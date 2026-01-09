@@ -1,9 +1,9 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform, useSpring, MotionValue } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, MotionValue, useInView } from 'framer-motion';
 import { AnimatedBorderCard } from '@/components/ui/animated-border-card';
-import { SPRING_CONFIG, OPACITY_SPRING_CONFIG, DIRECTION_TRANSFORMS, easeOutCubic, type Direction } from './constants';
+import { SPRING_CONFIG, DIRECTION_TRANSFORMS, easeOutCubic, type Direction } from './constants';
 
 type BorderDirection = "TOP" | "LEFT" | "BOTTOM" | "RIGHT";
 
@@ -34,47 +34,57 @@ function useIsMobile() {
 function useScrollSpring(scrollYProgress: MotionValue<number>, outputRange: [number, number], enabled: boolean) {
   const smoothProgress = useTransform(scrollYProgress, easeOutCubic);
   const value = useTransform(smoothProgress, [0, 1], outputRange);
-  // Lighter spring config for better performance
   const spring = useSpring(value, enabled ? SPRING_CONFIG : { stiffness: 200, damping: 30, mass: 0.1 });
   return enabled ? spring : value;
 }
 
-// Mobile-optimized card with CSS transitions
-function MobileServiceCard({ children, className = '', borderStart = 'TOP' }: Omit<ServiceCardProps, 'direction'>) {
+// Mobile-optimized card with Framer Motion (one-time animation, not scroll-linked)
+function MobileServiceCard({ children, className = '', direction = 'bottom', borderStart = 'TOP' }: ServiceCardProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1, rootMargin: '50px' }
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
+  // Direction-based initial transforms for variety
+  const getInitialTransform = () => {
+    switch (direction) {
+      case 'left': return { x: -40, y: 20, rotate: -2 };
+      case 'right': return { x: 40, y: 20, rotate: 2 };
+      case 'top': return { x: 0, y: -30, rotate: 0 };
+      case 'top-left': return { x: -30, y: -20, rotate: -1 };
+      case 'top-right': return { x: 30, y: -20, rotate: 1 };
+      default: return { x: 0, y: 40, rotate: 0 };
     }
+  };
 
-    return () => observer.disconnect();
-  }, []);
+  const initial = getInitialTransform();
 
   return (
-    <div
+    <motion.div
       ref={ref}
-      className={`h-full transition-all duration-500 ease-out ${className}`}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+      initial={{
+        opacity: 0,
+        y: initial.y,
+        x: initial.x,
+        scale: 0.95,
+        rotate: initial.rotate
       }}
+      animate={isInView ? {
+        opacity: 1,
+        y: 0,
+        x: 0,
+        scale: 1,
+        rotate: 0
+      } : {}}
+      transition={{
+        duration: 0.6,
+        ease: [0.25, 0.1, 0.25, 1],
+        opacity: { duration: 0.4 }
+      }}
+      className={`h-full ${className}`}
     >
       <AnimatedBorderCard initialDirection={borderStart} simplified>
         {children}
       </AnimatedBorderCard>
-    </div>
+    </motion.div>
   );
 }
 
@@ -88,7 +98,6 @@ function DesktopServiceCard({ children, className = '', direction = 'bottom', bo
 
   const transforms = DIRECTION_TRANSFORMS[direction];
 
-  // Simplified: only use essential transforms
   const smoothY = useScrollSpring(scrollYProgress, transforms.y, true);
   const smoothScale = useScrollSpring(scrollYProgress, [0.98, 1], true);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [0, 1]);
@@ -111,7 +120,6 @@ function DesktopServiceCard({ children, className = '', direction = 'bottom', bo
 export function ServiceCard(props: ServiceCardProps) {
   const isMobile = useIsMobile();
 
-  // Render appropriate version based on device
   if (isMobile) {
     return <MobileServiceCard {...props} />;
   }

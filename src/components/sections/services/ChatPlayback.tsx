@@ -98,8 +98,8 @@ export function ChatPlayback() {
         <span className="text-[10px] text-zinc-500 font-medium">Support Assistant</span>
       </div>
 
-      {/* Chat Messages - reduced height and padding */}
-      <div ref={chatContainerRef} className="h-[220px] p-3 space-y-3 overflow-y-auto">
+      {/* Chat Messages */}
+      <div ref={chatContainerRef} className="h-[260px] p-4 space-y-4 overflow-y-auto">
         {/* Bot welcome */}
         <div className="flex gap-2">
           <BotAvatar />

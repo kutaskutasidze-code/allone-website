@@ -71,7 +71,8 @@
       "Bash(npx shadcn@latest add:*)",
       "Bash(supabase db reset:*)",
       "Bash(node scripts/run-migration.mjs:*)",
-      "Skill(code-audit)"
+      "Skill(code-audit)",
+      "Bash(git push:*)"
     ]
   }
 }
