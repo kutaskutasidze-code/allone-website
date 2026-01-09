@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { TypewriterTitle } from '@/components/ui/TypewriterTitle';
 
 // Skeleton card variations for organic feel
@@ -188,7 +189,7 @@ export function WorkComingSoon() {
           />
         </motion.div>
 
-        {/* Disabled CTA button */}
+        {/* CTA button */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -196,12 +197,12 @@ export function WorkComingSoon() {
           transition={{ duration: 0.6, delay: 0.5 }}
           className="flex justify-center mt-10"
         >
-          <button
-            disabled
-            className="px-8 py-4 rounded-full border border-zinc-200 text-zinc-400 font-medium cursor-not-allowed opacity-60 transition-opacity"
+          <Link
+            href="/projects"
+            className="px-8 py-4 rounded-full border border-zinc-900 text-zinc-900 font-medium hover:bg-zinc-900 hover:text-white transition-all duration-300"
           >
             See all projects &rarr;
-          </button>
+          </Link>
         </motion.div>
       </div>
     </section>
