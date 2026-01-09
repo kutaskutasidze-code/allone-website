@@ -72,7 +72,8 @@
       "Bash(supabase db reset:*)",
       "Bash(node scripts/run-migration.mjs:*)",
       "Skill(code-audit)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(ls:*)"
     ]
   }
 }

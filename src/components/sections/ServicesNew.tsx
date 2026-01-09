@@ -28,7 +28,7 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
   const consultingService = getServiceByType(services, 'consulting');
 
   return (
-    <section className="py-24 lg:py-32 bg-black relative overflow-hidden">
+    <section id="services" className="py-24 lg:py-32 bg-black relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <motion.div
