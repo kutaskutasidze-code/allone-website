@@ -53,7 +53,7 @@ export function AnimatedBorderCard({
     return () => clearInterval(interval);
   }, [duration, clockwise, simplified]);
 
-  // Simplified version for mobile - no blur, no animation
+  // Simplified version for mobile - static glow, no animation
   if (simplified) {
     return (
       <div
@@ -62,6 +62,23 @@ export function AnimatedBorderCard({
           containerClassName
         )}
       >
+        {/* Static glow - positioned at top */}
+        <div
+          className="absolute inset-0 rounded-3xl"
+          style={{
+            background: "radial-gradient(50% 70% at 50% 0%, rgba(255,255,255,0.6) 0%, rgba(200,200,200,0.3) 35%, rgba(150,150,150,0.1) 60%, transparent 100%)",
+          }}
+        />
+
+        {/* Outer glow for depth */}
+        <div
+          className="absolute -inset-[1px] rounded-3xl opacity-40"
+          style={{
+            background: "radial-gradient(50% 50% at 50% 0%, rgba(255,255,255,0.5) 0%, transparent 70%)",
+            filter: "blur(4px)",
+          }}
+        />
+
         {/* Static subtle border */}
         <div
           className="absolute inset-0 rounded-3xl"
