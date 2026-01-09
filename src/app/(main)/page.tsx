@@ -10,8 +10,8 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
-      <DashboardShowcase />
       <ServicesNew services={services} />
+      <DashboardShowcase />
       <Clients clients={clients} />
       <WorkComingSoon />
       <CTA />
