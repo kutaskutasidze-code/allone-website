@@ -81,7 +81,7 @@ function MobileServiceCard({ children, className = '', direction = 'bottom', bor
       }}
       className={`h-full ${className}`}
     >
-      <AnimatedBorderCard initialDirection={borderStart}>
+      <AnimatedBorderCard initialDirection={borderStart} simplified>
         {children}
       </AnimatedBorderCard>
     </motion.div>
