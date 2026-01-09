@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Container } from '@/components/layout';
 import { useEffect, useRef } from 'react';
 import { GlassButton } from '@/components/ui/GlassButton';
+import { ShimmerText } from '@/components/ui/ShimmerText';
 import { ArrowRight, Sparkles } from 'lucide-react';
 
 interface Node {
@@ -40,6 +41,7 @@ function ConnectedNodes() {
 
     let animationFrameId: number;
     let nodes: Node[] = [];
+    let isPaused = false;
     const connectionDistance = 180;
     const nodeCount = 60;
 
@@ -86,6 +88,11 @@ function ConnectedNodes() {
     };
 
     const animate = (time: number) => {
+      if (isPaused) {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+
       const { width, height } = getCanvasDimensions();
 
       ctx.clearRect(0, 0, width, height);
@@ -193,8 +200,15 @@ function ConnectedNodes() {
     window.addEventListener('resize', handleResize);
     animationFrameId = requestAnimationFrame(animate);
 
+    // Pause animation when tab is not visible to save resources
+    const handleVisibilityChange = () => {
+      isPaused = document.hidden;
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     return () => {
       window.removeEventListener('resize', handleResize);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       cancelAnimationFrame(animationFrameId);
       clearTimeout(resizeTimeout);
     };
@@ -210,22 +224,19 @@ function ConnectedNodes() {
 
 export function Hero() {
   return (
-    <section className="min-h-[85vh] flex items-center justify-center relative overflow-hidden">
+    <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Connected nodes background */}
       <ConnectedNodes />
 
       <Container>
         <div className="flex flex-col items-center text-center pt-28 pb-16 lg:pt-36 lg:pb-20 relative z-10">
-          {/* Main Headline */}
-          <div className="overflow-hidden mb-6">
-            <motion.h1
-              initial={{ y: 100 }}
-              animate={{ y: 0 }}
-              transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-[clamp(2.5rem,6vw,5rem)] font-[var(--font-display)] font-light text-[var(--black)] leading-[1.1] tracking-[-0.02em]"
-            >
-              The Future Runs Itself
-            </motion.h1>
+          {/* Main Headline with Shimmer */}
+          <div className="mb-6">
+            <ShimmerText
+              text="The Future Runs Itself"
+              className="text-[clamp(2.5rem,6vw,4rem)] font-light leading-[1.1] tracking-[-0.02em]"
+              delay={0.2}
+            />
           </div>
 
           {/* Description */}

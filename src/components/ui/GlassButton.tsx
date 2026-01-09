@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useRef, useEffect, useCallback, useState } from 'react';
+import { forwardRef } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -20,8 +20,96 @@ interface GlassButtonProps extends Omit<HTMLMotionProps<'button'>, 'ref' | 'chil
 const sizeClasses: Record<GlassButtonSize, string> = {
   sm: 'px-5 py-2 text-xs',
   md: 'px-6 py-2.5 text-sm',
-  lg: 'px-8 py-3 text-sm',
+  lg: 'px-8 py-3.5 text-sm',
 };
+
+// Generate smooth keyframes (24 steps for ultra-smooth rotation)
+const generateGlowKeyframes = () => {
+  const steps = 24;
+  const keyframes: string[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const angle = (i / steps) * Math.PI * 2;
+    const x = Math.sin(angle) * 2;
+    const y = -Math.cos(angle) * 2;
+    const x2 = Math.sin(angle) * 1;
+    const y2 = -Math.cos(angle) * 1;
+    keyframes.push(
+      `inset ${x.toFixed(2)}px ${y.toFixed(2)}px 8px rgba(255,255,255,0.5), inset ${x2.toFixed(2)}px ${y2.toFixed(2)}px 3px rgba(255,255,255,0.7)`
+    );
+  }
+  return keyframes;
+};
+
+const glowKeyframes = generateGlowKeyframes();
+
+function AnimatedGlowButton({
+  children,
+  className,
+  size,
+  href,
+  ...props
+}: {
+  children: React.ReactNode;
+  className?: string;
+  size: GlassButtonSize;
+  href?: string;
+} & Omit<HTMLMotionProps<'button'>, 'ref' | 'children'>) {
+  const buttonContent = (
+    <>
+      {/* Black background with animated inner glow */}
+      <motion.div
+        className="absolute inset-0 rounded-full bg-[var(--black)] border border-zinc-600"
+        animate={{ boxShadow: glowKeyframes }}
+        transition={{
+          boxShadow: {
+            duration: 3,
+            repeat: Infinity,
+            ease: "linear",
+          }
+        }}
+      />
+
+      {/* Content */}
+      <span className="relative z-10">{children}</span>
+    </>
+  );
+
+  const commonClasses = cn(
+    'relative inline-flex items-center justify-center rounded-full',
+    'font-medium tracking-wide text-white',
+    'transition-all duration-300 ease-out',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gray-400)]/30 focus-visible:ring-offset-2',
+    'disabled:opacity-50 disabled:cursor-not-allowed',
+    sizeClasses[size],
+    className
+  );
+
+  if (href) {
+    return (
+      <motion.a
+        href={href}
+        className={commonClasses}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.15 }}
+      >
+        {buttonContent}
+      </motion.a>
+    );
+  }
+
+  return (
+    <motion.button
+      className={commonClasses}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.15 }}
+      {...props}
+    >
+      {buttonContent}
+    </motion.button>
+  );
+}
 
 export const GlassButton = forwardRef<HTMLButtonElement, GlassButtonProps>(
   (
@@ -39,19 +127,6 @@ export const GlassButton = forwardRef<HTMLButtonElement, GlassButtonProps>(
     },
     forwardedRef
   ) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-    const [isHovering, setIsHovering] = useState(false);
-
-    const handleMouseMove = useCallback((e: React.MouseEvent) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      setMousePos({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      });
-    }, []);
-
     const content = (
       <span className="relative z-10 flex items-center justify-center gap-2">
         {isLoading ? (
@@ -85,63 +160,63 @@ export const GlassButton = forwardRef<HTMLButtonElement, GlassButtonProps>(
       </span>
     );
 
+    const isPrimary = variant === 'primary';
+
+    // Use animated glow button for primary variant
+    if (isPrimary) {
+      return (
+        <AnimatedGlowButton
+          className={className}
+          size={size}
+          href={href}
+          disabled={disabled || isLoading}
+          {...props}
+        >
+          {content}
+        </AnimatedGlowButton>
+      );
+    }
+
+    // Secondary variant - regular button
     const commonClasses = cn(
       'relative inline-flex items-center justify-center rounded-full',
       'font-medium tracking-wide',
       'transition-all duration-300 ease-out',
-      'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30 focus-visible:ring-offset-2',
+      'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gray-400)]/30 focus-visible:ring-offset-2',
       'disabled:opacity-50 disabled:cursor-not-allowed',
-      variant === 'primary'
-        ? 'bg-[var(--black)] text-white hover:bg-[var(--black)]/90'
-        : 'bg-white/80 backdrop-blur-sm text-[var(--black)] border border-[var(--gray-200)] hover:border-[var(--gray-300)] hover:bg-white',
+      'border',
+      'bg-white text-[var(--black)] border-[var(--gray-300)] hover:border-[var(--gray-400)]',
       sizeClasses[size],
       className
     );
 
-    // Wrapper with gradient border effect
-    const wrapperContent = (
-      <div
-        ref={containerRef}
-        className="relative group rounded-full"
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
+    if (href) {
+      return (
+        <motion.a
+          href={href}
+          className={commonClasses}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.15 }}
+        >
+          {content}
+        </motion.a>
+      );
+    }
+
+    return (
+      <motion.button
+        ref={forwardedRef}
+        className={commonClasses}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.15 }}
+        disabled={disabled || isLoading}
+        {...props}
       >
-        {/* Gradient border glow - only visible on hover */}
-        <div
-          className="absolute -inset-[1px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-          style={{
-            background: isHovering
-              ? `radial-gradient(120px circle at ${mousePos.x}px ${mousePos.y}px, rgba(124, 58, 237, 0.4), rgba(236, 72, 153, 0.3) 40%, transparent 70%)`
-              : 'transparent',
-          }}
-        />
-
-        {href ? (
-          <motion.a
-            href={href}
-            className={commonClasses}
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.1 }}
-          >
-            {content}
-          </motion.a>
-        ) : (
-          <motion.button
-            ref={forwardedRef}
-            className={commonClasses}
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.1 }}
-            disabled={disabled || isLoading}
-            {...props}
-          >
-            {content}
-          </motion.button>
-        )}
-      </div>
+        {content}
+      </motion.button>
     );
-
-    return wrapperContent;
   }
 );
 

@@ -9,11 +9,13 @@ import { Menu, X, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Container } from './Container';
 import { navigation } from '@/data/navigation';
+import { GlassButton } from '@/components/ui/GlassButton';
+import { useContactInfo } from '@/contexts';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [contactEmail, setContactEmail] = useState('hello@allone.ai');
+  const { contactInfo } = useContactInfo();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -23,17 +25,6 @@ export function Header() {
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    fetch('/api/contact-info')
-      .then(res => res.json())
-      .then(data => {
-        if (data.email) {
-          setContactEmail(data.email);
-        }
-      })
-      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -100,15 +91,17 @@ export function Header() {
             </div>
 
             {/* Desktop CTA */}
-            <Link
-              href="/contact"
-              className="hidden md:flex items-center gap-2 text-sm font-medium text-[var(--accent)] group"
-            >
-              <span className="border-b border-[var(--accent)] pb-0.5 group-hover:border-[var(--accent-light)] transition-colors duration-300">
+            <div className="hidden md:block">
+              <GlassButton
+                href="/contact"
+                variant="primary"
+                size="sm"
+                rightIcon={<ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />}
+                className="group"
+              >
                 Get in touch
-              </span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
+              </GlassButton>
+            </div>
 
             {/* Mobile Menu Button */}
             <button
@@ -172,10 +165,10 @@ export function Header() {
                   Get in touch
                 </p>
                 <a
-                  href={`mailto:${contactEmail}`}
+                  href={`mailto:${contactInfo.email}`}
                   className="text-base font-[var(--font-display)] font-medium text-[var(--black)]"
                 >
-                  {contactEmail}
+                  {contactInfo.email}
                 </a>
               </motion.div>
             </div>

@@ -3,19 +3,24 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { Container } from '@/components/layout';
-import { ColorWave } from '@/components/shared/ColorWave';
+import { BackgroundPaths } from '@/components/ui/BackgroundPaths';
 import { GlassButton } from '@/components/ui/GlassButton';
+import { ShimmerText } from '@/components/ui/ShimmerText';
 
 export function CTA() {
   return (
-    <section className="relative overflow-hidden bg-white">
-      {/* Soft wave at bottom */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <ColorWave height={180} />
-      </div>
+    <section className="relative overflow-hidden bg-white min-h-[500px] flex items-center">
+      {/* Animated background paths */}
+      <BackgroundPaths />
 
       <Container>
-        <div className="max-w-3xl mx-auto text-center relative z-10 py-20 lg:py-28">
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+          className="max-w-3xl mx-auto text-center relative z-10 py-20 lg:py-28"
+        >
           {/* Label */}
           <motion.p
             initial={{ opacity: 0 }}
@@ -27,16 +32,14 @@ export function CTA() {
             Get in touch
           </motion.p>
 
-          {/* Headline */}
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-3xl sm:text-4xl lg:text-5xl font-[var(--font-display)] font-light text-[var(--black)] leading-[1.15] mb-6"
-          >
-            Ready to start your next project?
-          </motion.h2>
+          {/* Headline - same style as Hero with ShimmerText */}
+          <div className="mb-6">
+            <ShimmerText
+              text="Ready to Start Your Next Project?"
+              className="text-[clamp(1.75rem,4vw,3.5rem)] font-light leading-[1.1] tracking-[-0.02em]"
+              delay={0.1}
+            />
+          </div>
 
           {/* Description */}
           <motion.p
@@ -75,7 +78,7 @@ export function CTA() {
               View our work
             </GlassButton>
           </motion.div>
-        </div>
+        </motion.div>
       </Container>
     </section>
   );

@@ -1,16 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, Check } from 'lucide-react';
 import { Container } from '@/components/layout';
 import { Button, Input, Textarea, Select } from '@/components/ui';
-
-interface ContactInfo {
-  email: string;
-  location: string;
-  phone?: string;
-}
+import { useContactInfo } from '@/contexts';
 
 const serviceOptions = [
   { value: 'chatbots', label: 'AI Chatbots & Assistants' },
@@ -35,6 +30,7 @@ interface FormErrors {
 }
 
 export function ContactForm() {
+  const { contactInfo } = useContactInfo();
   const [formData, setFormData] = useState<FormState>({
     name: '',
     email: '',
@@ -45,23 +41,6 @@ export function ContactForm() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [contactInfo, setContactInfo] = useState<ContactInfo>({
-    email: 'hello@allone.ai',
-    location: 'San Francisco, CA',
-  });
-
-  useEffect(() => {
-    fetch('/api/contact-info')
-      .then(res => res.json())
-      .then(data => {
-        if (data.email) {
-          setContactInfo(data);
-        }
-      })
-      .catch(() => {
-        // Keep default values on error
-      });
-  }, []);
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};

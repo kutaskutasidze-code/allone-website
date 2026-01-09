@@ -74,6 +74,13 @@ export async function PUT(request: Request, { params }: RouteParams) {
     if (validated.description !== undefined) updateData.description = validated.description;
     if (validated.icon !== undefined) updateData.icon = validated.icon;
     if (validated.features !== undefined) updateData.features = validated.features;
+    if (validated.subtitle !== undefined) updateData.subtitle = validated.subtitle;
+    if (validated.secondary_description !== undefined) updateData.secondary_description = validated.secondary_description;
+    if (validated.stats !== undefined) updateData.stats = validated.stats;
+    if (validated.footer_text !== undefined) updateData.footer_text = validated.footer_text;
+    if (validated.cta_text !== undefined) updateData.cta_text = validated.cta_text;
+    if (validated.cta_url !== undefined) updateData.cta_url = validated.cta_url;
+    if (validated.card_type !== undefined) updateData.card_type = validated.card_type;
     if (validated.is_published !== undefined) updateData.is_published = validated.is_published;
     if (validated.display_order !== undefined) updateData.display_order = validated.display_order;
 

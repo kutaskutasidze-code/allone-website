@@ -1,6 +1,6 @@
 'use client';
 
-import { forwardRef, useRef, useState, useCallback } from 'react';
+import { forwardRef } from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
@@ -43,51 +43,30 @@ export const GlassPanel = forwardRef<HTMLDivElement, GlassPanelProps>(
     },
     forwardedRef
   ) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-    const [isHovering, setIsHovering] = useState(false);
-
-    const handleMouseMove = useCallback((e: React.MouseEvent) => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      setMousePos({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
-      });
-    }, []);
-
     const MotionComponent = motion[as] as typeof motion.div;
 
     return (
-      <div
-        ref={containerRef}
-        className={cn('relative group', roundedClasses[rounded])}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-      >
-        {/* Gradient border glow - only visible on hover */}
+      <div className={cn('relative group', roundedClasses[rounded])}>
+        {/* Static gradient border */}
         <div
           className={cn(
-            'absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none',
+            'absolute -inset-[1px] transition-all duration-300 pointer-events-none',
+            'bg-gradient-to-b from-[var(--gray-200)] via-[var(--gray-300)] to-[var(--gray-400)]',
+            'group-hover:from-[var(--gray-300)] group-hover:via-[var(--gray-400)] group-hover:to-[var(--gray-500)]',
             roundedClasses[rounded]
           )}
-          style={{
-            background: isHovering
-              ? `radial-gradient(300px circle at ${mousePos.x}px ${mousePos.y}px, rgba(124, 58, 237, 0.25), rgba(236, 72, 153, 0.15) 50%, transparent 80%)`
-              : 'transparent',
-          }}
         />
 
         <MotionComponent
           ref={forwardedRef}
           className={cn(
             'relative',
-            'bg-white/60 backdrop-blur-md',
-            'border border-[var(--gray-200)]/60',
+            'bg-white',
             paddingClasses[padding],
             roundedClasses[rounded],
-            hover && 'transition-all duration-300 hover:bg-white/80 hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5',
+            'transition-all duration-300',
+            hover && 'group-hover:-translate-y-0.5',
+            'shadow-sm group-hover:shadow-lg',
             className
           )}
           {...props}

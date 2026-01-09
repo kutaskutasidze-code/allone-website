@@ -52,7 +52,26 @@
       "Bash(git init:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(gh repo create:*)",
+      "Bash(winget install:*)",
+      "Bash(gh auth:*)",
+      "Bash(timeout /t 3 /nobreak)",
+      "Bash(copy \"C:\\\\Users\\\\hp\\\\Pictures\\\\Screenshots\\\\dashboard-screenshot.png\" \"C:\\\\Users\\\\hp\\\\Desktop\\\\Projects\\\\Allone\\\\public\\\\images\\\\dashboard-showcase.png\")",
+      "Bash(timeout /t 30 /nobreak)",
+      "Bash(npx tsc:*)",
+      "Bash(cat:*)",
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\hp\\\\Pictures\" -Filter \"*.png\")",
+      "Bash(Select-Object Name, LastWriteTime)",
+      "Bash(Sort-Object LastWriteTime -Descending)",
+      "Bash(Select-Object -First 20)",
+      "Bash(node scripts/capture-hero.mjs:*)",
+      "Bash(vercel --prod:*)",
+      "WebFetch(domain:ui.aceternity.com)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(supabase db reset:*)",
+      "Bash(node scripts/run-migration.mjs:*)",
+      "Skill(code-audit)"
     ]
   }
 }

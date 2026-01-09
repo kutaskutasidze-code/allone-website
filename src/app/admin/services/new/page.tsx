@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Input, Textarea, Select } from '@/components/ui';
-import { ArrayInput } from '@/components/admin';
+import { ArrayInput, StatsInput } from '@/components/admin';
 import { ArrowLeft, Save } from 'lucide-react';
 
 const iconOptions = [
@@ -19,12 +19,28 @@ const iconOptions = [
   { value: 'Shield', label: 'Shield (Security)' },
 ];
 
+const cardTypeOptions = [
+  { value: '', label: 'None (Generic card)' },
+  { value: 'chatbot', label: 'AI Chatbots & Assistants' },
+  { value: 'custom_ai', label: 'Custom AI Solutions' },
+  { value: 'workflow', label: 'Workflow Automation' },
+  { value: 'website', label: 'Website Development' },
+  { value: 'consulting', label: 'Strategy & Consulting' },
+];
+
 export default function NewServicePage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     icon: 'MessageSquare',
     features: [] as string[],
+    subtitle: '',
+    secondary_description: '',
+    stats: [] as { value: string; label: string }[],
+    footer_text: '',
+    cta_text: '',
+    cta_url: '',
+    card_type: '',
     is_published: true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -48,7 +64,18 @@ export default function NewServicePage() {
       const display_order = lastService ? lastService.display_order + 1 : 0;
 
       const { error: insertError } = await supabase.from('services').insert({
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        icon: formData.icon,
+        features: formData.features,
+        subtitle: formData.subtitle || null,
+        secondary_description: formData.secondary_description || null,
+        stats: formData.stats,
+        footer_text: formData.footer_text || null,
+        cta_text: formData.cta_text || null,
+        cta_url: formData.cta_url || null,
+        card_type: formData.card_type || null,
+        is_published: formData.is_published,
         display_order,
       });
 
@@ -85,7 +112,10 @@ export default function NewServicePage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Basic Info */}
         <div className="rounded-xl border border-[var(--gray-200)] bg-white p-6 space-y-6">
+          <h2 className="text-lg font-semibold text-black border-b border-[var(--gray-200)] pb-3 -mt-1">Basic Information</h2>
+
           <Input
             label="Service Title"
             value={formData.title}
@@ -102,9 +132,37 @@ export default function NewServicePage() {
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
             }
-            placeholder="Describe what this service offers..."
-            rows={4}
+            placeholder="Main description of the service..."
+            rows={3}
             required
+          />
+
+          <Input
+            label="Subtitle (optional)"
+            value={formData.subtitle}
+            onChange={(e) =>
+              setFormData({ ...formData, subtitle: e.target.value })
+            }
+            placeholder="e.g., Conversations that actually help"
+          />
+
+          <Textarea
+            label="Secondary Description (optional)"
+            value={formData.secondary_description}
+            onChange={(e) =>
+              setFormData({ ...formData, secondary_description: e.target.value })
+            }
+            placeholder="Additional description paragraph..."
+            rows={3}
+          />
+
+          <Select
+            label="Card Type (Landing Page)"
+            value={formData.card_type}
+            onChange={(e) =>
+              setFormData({ ...formData, card_type: e.target.value })
+            }
+            options={cardTypeOptions}
           />
 
           <Select
@@ -115,9 +173,14 @@ export default function NewServicePage() {
             }
             options={iconOptions}
           />
+        </div>
+
+        {/* Features & Stats */}
+        <div className="rounded-xl border border-[var(--gray-200)] bg-white p-6 space-y-6">
+          <h2 className="text-lg font-semibold text-black border-b border-[var(--gray-200)] pb-3 -mt-1">Features & Statistics</h2>
 
           <ArrayInput
-            label="Features"
+            label="Features / Tags"
             value={formData.features}
             onChange={(features) =>
               setFormData({ ...formData, features })
@@ -125,7 +188,48 @@ export default function NewServicePage() {
             placeholder="Add a feature (e.g., Natural language understanding)"
           />
 
-          <div className="flex items-center gap-3">
+          <StatsInput
+            label="Statistics (shown on card)"
+            value={formData.stats}
+            onChange={(stats) =>
+              setFormData({ ...formData, stats })
+            }
+          />
+        </div>
+
+        {/* CTA & Footer */}
+        <div className="rounded-xl border border-[var(--gray-200)] bg-white p-6 space-y-6">
+          <h2 className="text-lg font-semibold text-black border-b border-[var(--gray-200)] pb-3 -mt-1">Call to Action & Footer</h2>
+
+          <Input
+            label="Footer Text (optional)"
+            value={formData.footer_text}
+            onChange={(e) =>
+              setFormData({ ...formData, footer_text: e.target.value })
+            }
+            placeholder="e.g., Connect your tools. Data flows automatically."
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label="CTA Button Text (optional)"
+              value={formData.cta_text}
+              onChange={(e) =>
+                setFormData({ ...formData, cta_text: e.target.value })
+              }
+              placeholder="e.g., Book a free call"
+            />
+            <Input
+              label="CTA Button URL (optional)"
+              value={formData.cta_url}
+              onChange={(e) =>
+                setFormData({ ...formData, cta_url: e.target.value })
+              }
+              placeholder="e.g., /contact"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 pt-4 border-t border-[var(--gray-100)]">
             <input
               type="checkbox"
               id="is_published"

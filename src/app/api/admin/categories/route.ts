@@ -1,3 +1,5 @@
+import { revalidatePath } from 'next/cache';
+import { invalidateCache } from '@/lib/cache';
 import { requireAuth, AuthError } from '@/lib/auth';
 import {
   success,
@@ -82,6 +84,8 @@ export async function POST(request: Request) {
     }
 
     logger.audit('create', 'categories', data.id, userId, { name: validated.name });
+    invalidateCache('categories');
+    revalidatePath('/admin/projects');
 
     return success(data, 201);
   } catch (err) {

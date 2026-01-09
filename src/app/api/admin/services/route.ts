@@ -71,6 +71,13 @@ export async function POST(request: Request) {
         description: validated.description,
         icon: validated.icon,
         features: validated.features,
+        subtitle: validated.subtitle || null,
+        secondary_description: validated.secondary_description || null,
+        stats: validated.stats || [],
+        footer_text: validated.footer_text || null,
+        cta_text: validated.cta_text || null,
+        cta_url: validated.cta_url || null,
+        card_type: validated.card_type || null,
         is_published: validated.is_published,
         display_order,
       })

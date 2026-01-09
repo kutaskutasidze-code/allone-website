@@ -70,7 +70,7 @@ export function ProjectsGrid({
           </div>
         )}
 
-        {/* Glass Filter Bar */}
+        {/* Filter Bar */}
         {showFilters && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -79,7 +79,7 @@ export function ProjectsGrid({
             transition={{ duration: 0.5 }}
             className="mb-10"
           >
-            <GlassPanel padding="sm" rounded="2xl" className="inline-flex flex-wrap gap-2">
+            <div className="inline-flex flex-wrap gap-2 bg-white rounded-2xl p-2 shadow-sm">
               {categories.map((category, index) => (
                 <motion.button
                   key={category}
@@ -94,14 +94,14 @@ export function ProjectsGrid({
                     ${
                       activeCategory === category
                         ? 'bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/20'
-                        : 'bg-white/50 text-[var(--gray-600)] hover:bg-white/80 hover:text-[var(--accent)]'
+                        : 'text-[var(--gray-600)] hover:bg-[var(--gray-100)] hover:text-[var(--accent)]'
                     }
                   `}
                 >
                   {category}
                 </motion.button>
               ))}
-            </GlassPanel>
+            </div>
           </motion.div>
         )}
 

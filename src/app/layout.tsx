@@ -19,6 +19,10 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'ALLONE' }],
   creator: 'ALLONE',
+  icons: {
+    icon: '/images/allone-logo.png',
+    apple: '/images/allone-logo.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',

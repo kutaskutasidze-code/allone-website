@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Container } from '@/components/layout';
-import { Button } from '@/components/ui';
+import { GlassButton } from '@/components/ui/GlassButton';
 import { ArrowRight, MessageSquare, Workflow, Cpu, Lightbulb, Check } from 'lucide-react';
 import { ServiceAnimations } from '@/components/sections/ServiceAnimations';
 import type { Service } from '@/types/database';
@@ -112,13 +112,14 @@ export function ServicesContent({ services }: ServicesContentProps) {
                       ))}
                     </div>
 
-                    <Button
-                      variant="outline"
+                    <GlassButton
+                      href="/contact"
+                      variant="secondary"
+                      size="md"
                       rightIcon={<ArrowRight className="w-4 h-4" />}
-                      onClick={() => window.location.href = '/contact'}
                     >
                       Get Started
-                    </Button>
+                    </GlassButton>
                   </div>
 
                   {/* Visual - Canvas Animation */}
@@ -173,14 +174,14 @@ export function ServicesContent({ services }: ServicesContentProps) {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              <Button
+              <GlassButton
+                href="/contact"
                 variant="primary"
                 size="lg"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
-                onClick={() => window.location.href = '/contact'}
               >
                 Schedule a Consultation
-              </Button>
+              </GlassButton>
             </motion.div>
           </div>
         </Container>

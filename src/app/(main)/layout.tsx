@@ -1,4 +1,8 @@
+'use client';
+
 import { Header, Footer } from '@/components/layout';
+import { ContactInfoProvider } from '@/contexts';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function MainLayout({
   children,
@@ -6,10 +10,12 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <Header />
-      <main className="min-h-screen relative">{children}</main>
-      <Footer />
-    </>
+    <ContactInfoProvider>
+      <ErrorBoundary>
+        <Header />
+        <main className="min-h-screen relative">{children}</main>
+        <Footer />
+      </ErrorBoundary>
+    </ContactInfoProvider>
   );
 }

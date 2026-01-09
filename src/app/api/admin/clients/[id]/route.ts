@@ -9,6 +9,41 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+export async function GET(request: Request, { params }: RouteParams) {
+  try {
+    const { supabase, userId } = await requireAuth();
+    const { id } = await params;
+
+    // Validate ID
+    const idResult = idParamSchema.safeParse({ id });
+    if (!idResult.success) {
+      return validationError(idResult.error);
+    }
+
+    logger.db('select', 'clients', { userId, resourceId: id });
+
+    const { data, error: dbError } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (dbError) {
+      if (dbError.code === 'PGRST116') {
+        return notFound('Client');
+      }
+      logger.error('Failed to fetch client', { error: dbError.message, userId, resourceId: id });
+      return error('Failed to fetch client');
+    }
+
+    return success(data);
+  } catch (err) {
+    if (err instanceof AuthError) return unauthorized();
+    logger.error('Unexpected error in GET /api/admin/clients/[id]', { error: String(err) });
+    return error('Internal server error');
+  }
+}
+
 export async function PUT(request: Request, { params }: RouteParams) {
   try {
     const { supabase, userId } = await requireAuth();

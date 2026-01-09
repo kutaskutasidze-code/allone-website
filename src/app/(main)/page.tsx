@@ -1,30 +1,19 @@
-import { Hero, Services, Clients, ProjectsGrid, CTA } from '@/components/sections';
-import {
-  getCachedProjects,
-  getCachedServices,
-  getCachedClients,
-} from '@/lib/cache';
+import { Hero, DashboardShowcase, ServicesNew, Clients, WorkComingSoon, CTA } from '@/components/sections';
+import { getCachedClients, getCachedServices } from '@/lib/cache';
 
 export default async function HomePage() {
-  // Fetch cached data in parallel
-  const [projects, services, clients] = await Promise.all([
-    getCachedProjects(),
-    getCachedServices(),
+  const [clients, services] = await Promise.all([
     getCachedClients(),
+    getCachedServices(),
   ]);
 
   return (
     <>
       <Hero />
-      <Services services={services} />
+      <DashboardShowcase />
+      <ServicesNew services={services} />
       <Clients clients={clients} />
-      <ProjectsGrid
-        projects={projects}
-        limit={3}
-        showFilters={false}
-        singleRow={true}
-        showSeeAll={true}
-      />
+      <WorkComingSoon />
       <CTA />
     </>
   );

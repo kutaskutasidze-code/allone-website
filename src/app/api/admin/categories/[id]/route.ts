@@ -1,3 +1,5 @@
+import { revalidatePath } from 'next/cache';
+import { invalidateCache } from '@/lib/cache';
 import { requireAuth, AuthError } from '@/lib/auth';
 import { success, error, validationError, unauthorized, notFound, conflict } from '@/lib/api-response';
 import { updateCategorySchema, idParamSchema } from '@/lib/validations';
@@ -84,6 +86,8 @@ export async function PUT(request: Request, { params }: RouteParams) {
     }
 
     logger.audit('update', 'categories', id, userId);
+    invalidateCache('categories');
+    revalidatePath('/admin/projects');
 
     return success(data);
   } catch (err) {
@@ -135,6 +139,8 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     }
 
     logger.audit('delete', 'categories', id, userId);
+    invalidateCache('categories');
+    revalidatePath('/admin/projects');
 
     return success({ deleted: true });
   } catch (err) {

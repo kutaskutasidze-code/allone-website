@@ -44,11 +44,25 @@ export const updateProjectSchema = z.object({
 // Service Schemas
 // ============================================
 
+const serviceStatSchema = z.object({
+  value: z.string().min(1, 'Stat value is required'),
+  label: z.string().min(1, 'Stat label is required'),
+});
+
+const cardTypeSchema = z.enum(['chatbot', 'custom_ai', 'workflow', 'website', 'consulting', '']).nullable().optional();
+
 export const createServiceSchema = z.object({
   title: z.string().min(1, 'Title is required').max(255, 'Title too long'),
   description: z.string().min(1, 'Description is required'),
   icon: z.string().min(1, 'Icon is required').max(100),
   features: z.array(z.string()).default([]),
+  subtitle: z.string().max(255).nullable().optional(),
+  secondary_description: z.string().nullable().optional(),
+  stats: z.array(serviceStatSchema).default([]),
+  footer_text: z.string().max(255).nullable().optional(),
+  cta_text: z.string().max(100).nullable().optional(),
+  cta_url: z.string().max(255).nullable().optional(),
+  card_type: cardTypeSchema,
   is_published: z.boolean().default(true),
   display_order: displayOrderSchema,
 });
@@ -58,6 +72,13 @@ export const updateServiceSchema = z.object({
   description: z.string().min(1).optional(),
   icon: z.string().min(1).max(100).optional(),
   features: z.array(z.string()).optional(),
+  subtitle: z.string().max(255).nullable().optional(),
+  secondary_description: z.string().nullable().optional(),
+  stats: z.array(serviceStatSchema).optional(),
+  footer_text: z.string().max(255).nullable().optional(),
+  cta_text: z.string().max(100).nullable().optional(),
+  cta_url: z.string().max(255).nullable().optional(),
+  card_type: cardTypeSchema,
   is_published: z.boolean().optional(),
   display_order: displayOrderSchema,
 });

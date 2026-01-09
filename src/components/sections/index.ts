@@ -1,7 +1,9 @@
 export { Hero } from './Hero';
+export { DashboardShowcase } from './DashboardShowcase';
 export { Marquee } from './Marquee';
-export { Services } from './Services';
+export { default as ServicesNew } from './ServicesNew';
 export { Clients } from './Clients';
 export { ProjectsGrid } from './ProjectsGrid';
+export { WorkComingSoon } from './WorkComingSoon';
 export { CTA } from './CTA';
 export { ContactForm } from './ContactForm';
