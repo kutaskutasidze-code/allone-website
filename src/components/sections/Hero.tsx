@@ -224,7 +224,7 @@ function ConnectedNodes() {
 
 export function Hero() {
   return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+    <section className="min-h-[100svh] flex items-center justify-center relative overflow-hidden">
       {/* Connected nodes background */}
       <ConnectedNodes />
 
