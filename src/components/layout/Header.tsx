@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,7 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { contactInfo } = useContactInfo();
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,10 +28,12 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close menu on pathname change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
+  // Lock body scroll when menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = 'hidden';
@@ -41,6 +44,37 @@ export function Header() {
       document.body.style.overflow = 'unset';
     };
   }, [isMobileMenuOpen]);
+
+  // Handle mobile nav click - close menu and navigate
+  const handleMobileNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+
+    // Close menu immediately
+    setIsMobileMenuOpen(false);
+    document.body.style.overflow = 'unset';
+
+    // Handle hash links
+    if (href.includes('#')) {
+      const [path, hash] = href.split('#');
+      const targetPath = path || '/';
+
+      if (pathname === targetPath || (pathname === '/' && targetPath === '/')) {
+        // Same page - just scroll to element
+        setTimeout(() => {
+          const element = document.getElementById(hash);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100);
+      } else {
+        // Different page - navigate then scroll
+        router.push(href);
+      }
+    } else {
+      // Regular link
+      router.push(href);
+    }
+  }, [pathname, router]);
 
   return (
     <>
@@ -106,7 +140,7 @@ export function Header() {
             {/* Mobile Menu Button */}
             <button
               type="button"
-              className="md:hidden p-2 -mr-2"
+              className="md:hidden p-2 -mr-2 touch-manipulation"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
@@ -127,50 +161,41 @@ export function Header() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             className="fixed inset-0 z-40 md:hidden bg-white"
           >
             <div className="flex flex-col h-full pt-24 pb-8 px-6">
               <nav className="flex-1 space-y-1">
-                {navigation.map((item, index) => (
-                  <motion.div
-                    key={item.href}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Link
+                {navigation.map((item) => (
+                  <div key={item.href}>
+                    <a
                       href={item.href}
+                      onClick={(e) => handleMobileNavClick(e, item.href)}
                       className={cn(
-                        'block py-3 text-xl font-[var(--font-display)] font-light border-b border-[var(--gray-200)]',
-                        'transition-colors duration-300',
+                        'block py-4 text-xl font-[var(--font-display)] font-light border-b border-[var(--gray-200)]',
+                        'active:bg-gray-100 touch-manipulation',
                         pathname === item.href
                           ? 'text-[var(--black)]'
                           : 'text-[var(--gray-400)]'
                       )}
                     >
                       {item.label}
-                    </Link>
-                  </motion.div>
+                    </a>
+                  </div>
                 ))}
               </nav>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className="pt-8 border-t border-[var(--gray-200)]"
-              >
+              <div className="pt-8 border-t border-[var(--gray-200)]">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--gray-400)] mb-3">
                   Get in touch
                 </p>
                 <a
                   href={`mailto:${contactInfo.email}`}
-                  className="text-base font-[var(--font-display)] font-medium text-[var(--black)]"
+                  className="text-base font-[var(--font-display)] font-medium text-[var(--black)] touch-manipulation"
                 >
                   {contactInfo.email}
                 </a>
-              </motion.div>
+              </div>
             </div>
           </motion.div>
         )}
