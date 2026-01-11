@@ -462,7 +462,7 @@ export function DashboardContent({ counts, dailyRevenue, categoryRevenue, leadsD
           </div>
 
           {/* Lead Status Summary */}
-          <div className="grid grid-cols-5 gap-2 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
             {(['new', 'contacted', 'qualified', 'won', 'lost'] as const).map((status) => (
               <div
                 key={status}
@@ -478,8 +478,8 @@ export function DashboardContent({ counts, dailyRevenue, categoryRevenue, leadsD
 
           {/* Recent Leads Table */}
           {leadsData.recentLeads.length > 0 && (
-            <div className="bg-white border border-[var(--gray-200)] rounded-xl overflow-hidden">
-              <table className="w-full">
+            <div className="bg-white border border-[var(--gray-200)] rounded-xl overflow-x-auto">
+              <table className="w-full min-w-[500px]">
                 <thead>
                   <tr className="border-b border-[var(--gray-100)]">
                     <th className="text-left text-xs font-medium text-[var(--gray-500)] uppercase tracking-wider px-4 py-3">

@@ -217,8 +217,8 @@ export function SalesDashboardContent({ salesUser, stats, recentLeads }: SalesDa
             </Link>
           </div>
         ) : (
-          <div className="bg-white border border-[var(--gray-200)] rounded-xl overflow-hidden">
-            <table className="w-full">
+          <div className="bg-white border border-[var(--gray-200)] rounded-xl overflow-x-auto">
+            <table className="w-full min-w-[500px]">
               <thead>
                 <tr className="border-b border-[var(--gray-100)]">
                   <th className="text-left text-xs font-medium text-[var(--gray-500)] uppercase tracking-wider px-4 py-3">

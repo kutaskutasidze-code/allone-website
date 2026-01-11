@@ -92,7 +92,7 @@ function AdminLeadsPageContent() {
       )}
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {LEAD_STATUSES.map((status) => (
           <div
             key={status.value}
@@ -135,7 +135,7 @@ function AdminLeadsPageContent() {
         </div>
 
         {/* Status Filter */}
-        <div className="flex rounded-lg bg-[var(--gray-100)] p-0.5">
+        <div className="flex flex-wrap rounded-lg bg-[var(--gray-100)] p-0.5">
           <button
             onClick={() => setStatusFilter('all')}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
@@ -170,8 +170,8 @@ function AdminLeadsPageContent() {
           description={search || statusFilter !== 'all' ? 'Try adjusting your filters.' : 'No leads in the system yet.'}
         />
       ) : (
-        <div className="bg-white border border-[var(--gray-200)] rounded-xl overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white border border-[var(--gray-200)] rounded-xl overflow-x-auto">
+          <table className="w-full min-w-[700px]">
             <thead>
               <tr className="border-b border-[var(--gray-100)]">
                 <th className="text-left text-xs font-medium text-[var(--gray-500)] uppercase tracking-wider px-4 py-3">

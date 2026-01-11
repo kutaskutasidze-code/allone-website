@@ -147,7 +147,7 @@ function LeadsPageContent() {
         </div>
 
         {/* Status Filter */}
-        <div className="flex rounded-lg bg-[var(--gray-100)] p-0.5">
+        <div className="flex flex-wrap rounded-lg bg-[var(--gray-100)] p-0.5">
           <button
             onClick={() => setStatusFilter('all')}
             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
