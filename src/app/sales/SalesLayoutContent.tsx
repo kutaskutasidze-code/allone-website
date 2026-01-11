@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { SalesSidebar } from '@/components/sales/SalesSidebar';
 
 export function SalesLayoutContent({ children }: { children: React.ReactNode }) {
@@ -12,6 +11,17 @@ export function SalesLayoutContent({ children }: { children: React.ReactNode }) 
   // Sidebar state
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Track desktop vs mobile
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -33,6 +43,9 @@ export function SalesLayoutContent({ children }: { children: React.ReactNode }) 
     return <>{children}</>;
   }
 
+  // Calculate margin for desktop only
+  const desktopMargin = isDesktop ? (isCollapsed ? 72 : 256) : 0;
+
   return (
     <div className="min-h-screen bg-white">
       <SalesSidebar
@@ -47,15 +60,12 @@ export function SalesLayoutContent({ children }: { children: React.ReactNode }) 
         isMobileOpen={isMobileOpen}
         onMobileClose={() => setIsMobileOpen(false)}
       />
-      <motion.main
-        className="lg:transition-[margin-left] lg:duration-200"
-        initial={false}
-        animate={{ marginLeft: isCollapsed ? 72 : 256 }}
-        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        style={{ marginLeft: 0 }}
+      <main
+        className="min-h-screen transition-[margin-left] duration-200 ease-out"
+        style={{ marginLeft: desktopMargin }}
       >
-        <div className="min-h-screen p-4 pt-16 lg:pt-6 lg:p-8">{children}</div>
-      </motion.main>
+        <div className="p-4 pt-16 lg:pt-6 lg:p-8">{children}</div>
+      </main>
     </div>
   );
 }
