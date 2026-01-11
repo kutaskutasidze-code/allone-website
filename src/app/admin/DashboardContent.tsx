@@ -6,8 +6,6 @@ import {
   FolderKanban,
   Briefcase,
   Users,
-  BarChart3,
-  Heart,
   ArrowRight,
   Plus,
   FileText,
@@ -164,12 +162,8 @@ export function DashboardContent({ counts, dailyRevenue, categoryRevenue, leadsD
 
   const stats = [
     { title: 'Projects', count: counts.projects.total, published: counts.projects.published, icon: FolderKanban, href: '/admin/projects' },
-    { title: 'Services', count: counts.services.total, published: counts.services.published, icon: Briefcase, href: '/admin/services' },
     { title: 'Clients', count: counts.clients.total, published: counts.clients.published, icon: Users, href: '/admin/clients' },
     { title: 'Leads', count: leadsData.count, icon: UserCheck, href: '/admin/leads', highlight: true },
-    { title: 'Categories', count: counts.categories, icon: Tag, href: '/admin/categories' },
-    { title: 'Stats', count: counts.stats, icon: BarChart3, href: '/admin/stats' },
-    { title: 'Values', count: counts.values, icon: Heart, href: '/admin/values' },
   ];
 
   const quickActions = [
@@ -192,7 +186,7 @@ export function DashboardContent({ counts, dailyRevenue, categoryRevenue, leadsD
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat, index) => {
           const Icon = stat.icon;
           return (
