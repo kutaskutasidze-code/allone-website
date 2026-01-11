@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { ConfirmDialog } from '@/components/admin';
+import { ConfirmDialog, PageHeader, EmptyState } from '@/components/admin';
 import { Input } from '@/components/ui';
 import type { Stat } from '@/types/database';
-import { Plus, Trash2, Save, X } from 'lucide-react';
+import { Trash2, BarChart3, X, Save } from 'lucide-react';
 
 export default function StatsPage() {
   const [stats, setStats] = useState<Stat[]>([]);
@@ -105,36 +106,33 @@ export default function StatsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin h-8 w-8 border-2 border-black border-t-transparent rounded-full" />
+        <div className="w-6 h-6 border-2 border-[var(--gray-200)] border-t-[var(--black)] rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
+    <div className="space-y-6">
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-black">Stats</h1>
-          <p className="mt-2 text-[var(--gray-600)]">
-            Edit the statistics displayed on the About page
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--black)]">Stats</h1>
+          <p className="mt-1 text-sm text-[var(--gray-500)]">{stats.length} statistic{stats.length !== 1 ? 's' : ''}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {hasChanges && (
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--gray-800)] disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--black)] rounded-lg hover:bg-[var(--gray-800)] disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {isSaving ? 'Saving...' : 'Save'}
             </button>
           )}
           <button
             onClick={() => setShowAddForm(true)}
-            className="inline-flex items-center gap-2 rounded-lg border border-[var(--gray-300)] bg-white px-4 py-2.5 text-sm font-medium text-black transition-colors hover:border-black"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--black)] bg-white border border-[var(--gray-200)] rounded-lg hover:bg-[var(--gray-50)]"
           >
-            <Plus className="h-4 w-4" />
             Add Stat
           </button>
         </div>
@@ -143,11 +141,11 @@ export default function StatsPage() {
       {/* Add Form Modal */}
       {showAddForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowAddForm(false)} />
-          <div className="relative z-10 w-full max-w-md bg-white rounded-xl p-6 mx-4">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setShowAddForm(false)} />
+          <div className="relative z-10 w-full max-w-md bg-white rounded-xl p-6 mx-4 border border-[var(--gray-200)]">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold">Add New Stat</h2>
-              <button onClick={() => setShowAddForm(false)} className="text-[var(--gray-400)] hover:text-black">
+              <h2 className="text-base font-medium text-[var(--black)]">Add Stat</h2>
+              <button onClick={() => setShowAddForm(false)} className="text-[var(--gray-400)] hover:text-[var(--black)]">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -170,15 +168,14 @@ export default function StatsPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="px-4 py-2 text-sm text-[var(--gray-600)] hover:text-black"
+                  className="px-4 py-2 text-sm text-[var(--gray-600)] hover:text-[var(--black)]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-[var(--gray-800)]"
+                  className="px-4 py-2 text-sm font-medium text-white bg-[var(--black)] rounded-lg hover:bg-[var(--gray-800)]"
                 >
-                  <Plus className="h-4 w-4" />
                   Add Stat
                 </button>
               </div>
@@ -188,54 +185,46 @@ export default function StatsPage() {
       )}
 
       {stats.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--gray-300)] bg-white p-12 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--gray-100)]">
-            <Plus className="h-6 w-6 text-[var(--gray-400)]" />
-          </div>
-          <h3 className="mt-4 text-lg font-medium text-black">No stats yet</h3>
-          <p className="mt-2 text-sm text-[var(--gray-500)]">
-            Add statistics to display on your About page.
-          </p>
-        </div>
+        <EmptyState
+          icon={BarChart3}
+          title="No stats yet"
+          description="Add statistics to display on your About page."
+          action={{ label: 'Add Stat', onClick: () => setShowAddForm(true) }}
+        />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <div
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat, index) => (
+            <motion.div
               key={stat.id}
-              className="rounded-xl border border-[var(--gray-200)] bg-white p-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.03 }}
+              className="p-4 bg-white border border-[var(--gray-200)] rounded-xl"
             >
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium uppercase tracking-wider text-[var(--gray-500)] mb-2">
-                    Value
-                  </label>
-                  <input
-                    type="text"
-                    value={stat.value}
-                    onChange={(e) => handleChange(stat.id, 'value', e.target.value)}
-                    className="w-full text-3xl font-bold text-black bg-transparent border-0 border-b border-transparent focus:border-black focus:outline-none transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium uppercase tracking-wider text-[var(--gray-500)] mb-2">
-                    Label
-                  </label>
-                  <input
-                    type="text"
-                    value={stat.label}
-                    onChange={(e) => handleChange(stat.id, 'label', e.target.value)}
-                    className="w-full text-sm text-[var(--gray-600)] bg-transparent border-0 border-b border-transparent focus:border-black focus:outline-none transition-colors"
-                  />
-                </div>
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={stat.value}
+                  onChange={(e) => handleChange(stat.id, 'value', e.target.value)}
+                  className="w-full text-2xl font-semibold text-[var(--black)] bg-transparent border-0 border-b border-transparent focus:border-[var(--gray-300)] focus:outline-none"
+                  placeholder="Value"
+                />
+                <input
+                  type="text"
+                  value={stat.label}
+                  onChange={(e) => handleChange(stat.id, 'label', e.target.value)}
+                  className="w-full text-sm text-[var(--gray-500)] bg-transparent border-0 border-b border-transparent focus:border-[var(--gray-300)] focus:outline-none"
+                  placeholder="Label"
+                />
                 <button
                   onClick={() => setDeleteId(stat.id)}
-                  className="inline-flex items-center gap-1.5 text-sm text-[var(--gray-500)] hover:text-red-600 transition-colors"
+                  className="inline-flex items-center gap-1 text-xs text-[var(--gray-400)] hover:text-red-600 transition-colors"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-3 w-3" />
                   Remove
                 </button>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

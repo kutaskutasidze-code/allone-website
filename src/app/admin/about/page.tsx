@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Input, Textarea } from '@/components/ui';
-import { ArrayInput } from '@/components/admin';
+import { ArrayInput, PageHeader } from '@/components/admin';
 import type { AboutContent } from '@/types/database';
-import { Save, Check, AlertCircle } from 'lucide-react';
+import { Save, Check, X } from 'lucide-react';
 
 export default function AboutPage() {
   const [formData, setFormData] = useState<Partial<AboutContent>>({
@@ -80,36 +80,32 @@ export default function AboutPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin h-8 w-8 border-2 border-black border-t-transparent rounded-full" />
+        <div className="w-6 h-6 border-2 border-[var(--gray-200)] border-t-[var(--black)] rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-2xl space-y-6">
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-black">
-            About Page
-          </h1>
-          <p className="mt-2 text-[var(--gray-600)]">
-            Edit the content displayed on your About page
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--black)]">About Page</h1>
+          <p className="mt-1 text-sm text-[var(--gray-500)]">Edit the content displayed on your About page</p>
         </div>
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--gray-800)] disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--black)] rounded-lg hover:bg-[var(--gray-800)] disabled:opacity-50"
         >
           {saved ? (
             <>
               <Check className="h-4 w-4" />
-              Saved!
+              Saved
             </>
           ) : (
             <>
               <Save className="h-4 w-4" />
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {isSaving ? 'Saving...' : 'Save'}
             </>
           )}
         </button>
@@ -117,17 +113,19 @@ export default function AboutPage() {
 
       {/* Error Message */}
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 mb-8">
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          <span>{error}</span>
+        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm">
+          <span className="flex-1">{error}</span>
+          <button onClick={() => setError('')} className="text-red-400 hover:text-red-600">
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
-      <div className="space-y-8">
+      <div className="space-y-4">
         {/* Hero Section */}
-        <div className="rounded-xl border border-[var(--gray-200)] bg-white p-6">
-          <h2 className="text-lg font-semibold text-black mb-6">Hero Section</h2>
-          <div className="space-y-6">
+        <div className="rounded-xl border border-[var(--gray-200)] bg-white p-5">
+          <h2 className="text-sm font-medium text-[var(--black)] mb-4">Hero Section</h2>
+          <div className="space-y-4">
             <Input
               label="Subtitle"
               value={formData.hero_subtitle || ''}
@@ -149,9 +147,9 @@ export default function AboutPage() {
         </div>
 
         {/* Story Section */}
-        <div className="rounded-xl border border-[var(--gray-200)] bg-white p-6">
-          <h2 className="text-lg font-semibold text-black mb-6">Story Section</h2>
-          <div className="space-y-6">
+        <div className="rounded-xl border border-[var(--gray-200)] bg-white p-5">
+          <h2 className="text-sm font-medium text-[var(--black)] mb-4">Story Section</h2>
+          <div className="space-y-4">
             <Input
               label="Subtitle"
               value={formData.story_subtitle || ''}
@@ -175,18 +173,15 @@ export default function AboutPage() {
               onChange={(paragraphs) =>
                 setFormData({ ...formData, story_paragraphs: paragraphs })
               }
-              placeholder="Add a paragraph of your story..."
+              placeholder="Add a paragraph..."
             />
-            <p className="text-xs text-[var(--gray-500)]">
-              Each item becomes a separate paragraph in your story section.
-            </p>
           </div>
         </div>
 
         {/* Values Section Headers */}
-        <div className="rounded-xl border border-[var(--gray-200)] bg-white p-6">
-          <h2 className="text-lg font-semibold text-black mb-6">Values Section</h2>
-          <div className="space-y-6">
+        <div className="rounded-xl border border-[var(--gray-200)] bg-white p-5">
+          <h2 className="text-sm font-medium text-[var(--black)] mb-4">Values Section</h2>
+          <div className="space-y-4">
             <Input
               label="Subtitle"
               value={formData.values_subtitle || ''}
@@ -205,7 +200,7 @@ export default function AboutPage() {
             />
             <p className="text-xs text-[var(--gray-500)]">
               Manage individual values in the{' '}
-              <a href="/admin/values" className="underline hover:text-black">
+              <a href="/admin/values" className="underline hover:text-[var(--black)]">
                 Values section
               </a>
               .

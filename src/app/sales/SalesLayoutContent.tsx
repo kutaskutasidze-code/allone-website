@@ -1,25 +1,19 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { SalesSidebar } from '@/components/sales/SalesSidebar';
 
-export function AdminLayoutContent({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function SalesLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isLoginPage = pathname === '/admin/login';
+  const isLoginPage = pathname === '/sales/login';
 
-  // Login page has its own full-screen layout
   if (isLoginPage) {
     return <>{children}</>;
   }
 
-  // All other admin pages get the sidebar layout
   return (
     <div className="min-h-screen bg-white">
-      <AdminSidebar />
+      <SalesSidebar />
       <main className="ml-64">
         <div className="min-h-screen p-6 lg:p-8">{children}</div>
       </main>

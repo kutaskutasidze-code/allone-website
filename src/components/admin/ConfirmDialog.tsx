@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConfirmDialogProps {
@@ -57,48 +57,33 @@ export function ConfirmDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/30"
         onClick={onClose}
       />
 
       {/* Dialog */}
       <div
         ref={dialogRef}
-        className="relative z-10 w-full max-w-md bg-white rounded-xl shadow-2xl mx-4"
+        className="relative z-10 w-full max-w-sm bg-white rounded-xl border border-[var(--gray-200)] mx-4"
       >
-        <div className="p-6">
-          <div className="flex items-start gap-4">
-            <div
-              className={cn(
-                'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full',
-                variant === 'danger' ? 'bg-red-100' : 'bg-yellow-100'
-              )}
-            >
-              <AlertTriangle
-                className={cn(
-                  'h-5 w-5',
-                  variant === 'danger' ? 'text-red-600' : 'text-yellow-600'
-                )}
-              />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-black">{title}</h3>
-              <p className="mt-2 text-sm text-[var(--gray-600)]">{message}</p>
-            </div>
+        <div className="p-5">
+          <div className="flex items-start justify-between mb-4">
+            <h3 className="text-base font-medium text-[var(--black)]">{title}</h3>
             <button
               onClick={onClose}
-              className="text-[var(--gray-400)] hover:text-black transition-colors"
+              className="text-[var(--gray-400)] hover:text-[var(--black)] transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
+          <p className="text-sm text-[var(--gray-500)]">{message}</p>
         </div>
 
-        <div className="flex justify-end gap-3 px-6 py-4 bg-[var(--gray-50)] rounded-b-xl">
+        <div className="flex justify-end gap-2 px-5 py-4 border-t border-[var(--gray-100)]">
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="px-4 py-2 text-sm font-medium text-[var(--gray-700)] hover:text-black transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium text-[var(--gray-600)] hover:text-[var(--black)] transition-colors disabled:opacity-50"
           >
             {cancelText}
           </button>
@@ -109,7 +94,7 @@ export function ConfirmDialog({
               'px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors disabled:opacity-50',
               variant === 'danger'
                 ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-yellow-600 hover:bg-yellow-700'
+                : 'bg-[var(--black)] hover:bg-[var(--gray-800)]'
             )}
           >
             {isLoading ? 'Processing...' : confirmText}

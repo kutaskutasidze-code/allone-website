@@ -13,10 +13,11 @@ import {
   FileText,
   Settings,
   Tag,
-  TrendingUp,
-  Sparkles,
   DollarSign,
+  UserCheck,
 } from 'lucide-react';
+import type { Lead, SalesUser, LeadWithSalesUser } from '@/types/database';
+import { LEAD_STATUS_STYLES, LEAD_STATUS_LABELS } from '@/lib/validations/leads';
 import { useState, useMemo } from 'react';
 import {
   LineChart,
@@ -26,6 +27,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 
 interface DashboardContentProps {
@@ -38,38 +42,43 @@ interface DashboardContentProps {
     categories: number;
   };
   dailyRevenue: Array<{ date: string; revenue: number }>;
+  categoryRevenue: Array<{ name: string; value: number }>;
+  leadsData: {
+    count: number;
+    recentLeads: LeadWithSalesUser[];
+    stats: {
+      new: number;
+      contacted: number;
+      qualified: number;
+      won: number;
+      lost: number;
+      totalValue: number;
+    };
+  };
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
+// Monochrome color palette for pie chart
+const PIE_COLORS = [
+  '#111111',
+  '#333333',
+  '#555555',
+  '#777777',
+  '#999999',
+  '#bbbbbb',
+  '#dddddd',
+];
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const },
-  },
-};
 
-export function DashboardContent({ counts, dailyRevenue }: DashboardContentProps) {
+export function DashboardContent({ counts, dailyRevenue, categoryRevenue, leadsData }: DashboardContentProps) {
   const [period, setPeriod] = useState<'month' | 'year' | 'lifetime'>('year');
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
 
   const formatCurrency = (value: number) => {
     if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `$${(value / 1000).toFixed(1)}K`;
+    if (value >= 1000) return `$${(value / 1000).toFixed(0)}K`;
     return `$${value.toFixed(0)}`;
   };
 
-  // Get available years from data
   const availableYears = useMemo(() => {
     const years = new Set<number>();
     dailyRevenue.forEach(item => {
@@ -78,12 +87,10 @@ export function DashboardContent({ counts, dailyRevenue }: DashboardContentProps
     return Array.from(years).sort((a, b) => b - a);
   }, [dailyRevenue]);
 
-  // Build complete date range with all dates filled in
   const filteredRevenue = useMemo(() => {
     const now = new Date();
     const revenueMap = new Map<string, number>();
 
-    // Build map of existing revenue data
     dailyRevenue.forEach(item => {
       revenueMap.set(item.date, (revenueMap.get(item.date) || 0) + item.revenue);
     });
@@ -91,7 +98,6 @@ export function DashboardContent({ counts, dailyRevenue }: DashboardContentProps
     const result: Array<{ date: string; revenue: number; label: string }> = [];
 
     if (period === 'month') {
-      // Last 30 days
       for (let i = 29; i >= 0; i--) {
         const date = new Date(now);
         date.setDate(date.getDate() - i);
@@ -104,7 +110,6 @@ export function DashboardContent({ counts, dailyRevenue }: DashboardContentProps
         });
       }
     } else if (period === 'year') {
-      // Full year - aggregate by month
       for (let month = 0; month < 12; month++) {
         const monthStart = new Date(selectedYear, month, 1);
         const monthEnd = new Date(selectedYear, month + 1, 0);
@@ -122,7 +127,6 @@ export function DashboardContent({ counts, dailyRevenue }: DashboardContentProps
         });
       }
     } else {
-      // Lifetime - aggregate by year
       const years = new Set<number>();
       dailyRevenue.forEach(item => years.add(new Date(item.date).getFullYear()));
       const sortedYears = Array.from(years).sort((a, b) => a - b);
@@ -149,7 +153,6 @@ export function DashboardContent({ counts, dailyRevenue }: DashboardContentProps
       }
     }
 
-    // Calculate cumulative revenue
     let cumulative = 0;
     return result.map(item => {
       cumulative += item.revenue;
@@ -158,350 +161,376 @@ export function DashboardContent({ counts, dailyRevenue }: DashboardContentProps
   }, [dailyRevenue, period, selectedYear]);
 
   const totalRevenue = filteredRevenue.length > 0 ? filteredRevenue[filteredRevenue.length - 1].cumulative : 0;
-  const cards = [
-    {
-      title: 'Projects',
-      total: counts.projects.total,
-      published: counts.projects.published,
-      icon: FolderKanban,
-      href: '/admin/projects',
-      description: 'Portfolio projects',
-      color: 'from-blue-500/10 to-blue-600/5',
-      iconBg: 'bg-blue-500',
-    },
-    {
-      title: 'Services',
-      total: counts.services.total,
-      published: counts.services.published,
-      icon: Briefcase,
-      href: '/admin/services',
-      description: 'Service offerings',
-      color: 'from-emerald-500/10 to-emerald-600/5',
-      iconBg: 'bg-emerald-500',
-    },
-    {
-      title: 'Clients',
-      total: counts.clients.total,
-      published: counts.clients.published,
-      icon: Users,
-      href: '/admin/clients',
-      description: 'Client logos',
-      color: 'from-violet-500/10 to-violet-600/5',
-      iconBg: 'bg-violet-500',
-    },
-    {
-      title: 'Categories',
-      total: counts.categories,
-      icon: Tag,
-      href: '/admin/categories',
-      description: 'Project categories',
-      color: 'from-amber-500/10 to-amber-600/5',
-      iconBg: 'bg-amber-500',
-    },
-    {
-      title: 'Stats',
-      total: counts.stats,
-      icon: BarChart3,
-      href: '/admin/stats',
-      description: 'Site statistics',
-      color: 'from-rose-500/10 to-rose-600/5',
-      iconBg: 'bg-rose-500',
-    },
-    {
-      title: 'Values',
-      total: counts.values,
-      icon: Heart,
-      href: '/admin/values',
-      description: 'Company values',
-      color: 'from-cyan-500/10 to-cyan-600/5',
-      iconBg: 'bg-cyan-500',
-    },
+
+  const stats = [
+    { title: 'Projects', count: counts.projects.total, published: counts.projects.published, icon: FolderKanban, href: '/admin/projects' },
+    { title: 'Services', count: counts.services.total, published: counts.services.published, icon: Briefcase, href: '/admin/services' },
+    { title: 'Clients', count: counts.clients.total, published: counts.clients.published, icon: Users, href: '/admin/clients' },
+    { title: 'Leads', count: leadsData.count, icon: UserCheck, href: '/admin/leads', highlight: true },
+    { title: 'Categories', count: counts.categories, icon: Tag, href: '/admin/categories' },
+    { title: 'Stats', count: counts.stats, icon: BarChart3, href: '/admin/stats' },
+    { title: 'Values', count: counts.values, icon: Heart, href: '/admin/values' },
   ];
 
   const quickActions = [
-    { label: 'Add New Project', href: '/admin/projects/new', icon: FolderKanban, primary: true },
-    { label: 'Add New Service', href: '/admin/services/new', icon: Briefcase },
-    { label: 'Edit About Page', href: '/admin/about', icon: FileText },
-    { label: 'Update Contact', href: '/admin/settings', icon: Settings },
+    { label: 'Add Project', href: '/admin/projects/new', icon: FolderKanban },
+    { label: 'Add Service', href: '/admin/services/new', icon: Briefcase },
+    { label: 'Edit About', href: '/admin/about', icon: FileText },
+    { label: 'Contact Info', href: '/admin/settings', icon: Settings },
   ];
 
   return (
-    <motion.div
-      className="space-y-8"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
+    <div className="space-y-8">
       {/* Header */}
-      <motion.div variants={itemVariants} className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <motion.div
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent-light)] text-white"
-              animate={{ rotate: [0, 5, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-            >
-              <Sparkles className="w-5 h-5" />
-            </motion.div>
-            <h1 className="text-3xl font-[var(--font-display)] font-bold tracking-tight text-[var(--black)]">
-              Dashboard
-            </h1>
-          </div>
-          <p className="text-[var(--gray-500)] max-w-lg">
-            Welcome back! Here&apos;s an overview of your content. Manage all your website content from this panel.
-          </p>
-        </div>
-        <motion.div
-          className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-sm font-medium"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          System Online
-        </motion.div>
-      </motion.div>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-[var(--black)]">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-[var(--gray-500)]">
+          Overview of your content and activity
+        </p>
+      </div>
 
-      {/* Revenue Chart - Full Width */}
-      <motion.div
-        variants={itemVariants}
-        className="rounded-2xl border border-[var(--gray-200)] bg-white p-6"
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--gray-100)]">
-              <DollarSign className="w-5 h-5 text-[var(--black)]" />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-[var(--black)]">Revenue</h2>
-              <p className="text-sm text-[var(--gray-500)]">
-                {period === 'month' ? 'Last 30 days' : period === 'year' ? `Year ${selectedYear}` : 'All time'}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* Period Selector */}
-            <div className="flex rounded-lg bg-[var(--gray-100)] p-1">
-              {(['month', 'year', 'lifetime'] as const).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPeriod(p)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                    period === p
-                      ? 'bg-white text-[var(--black)] shadow-sm'
-                      : 'text-[var(--gray-600)] hover:text-[var(--black)]'
-                  }`}
-                >
-                  {p === 'month' ? '1M' : p === 'year' ? '1Y' : 'All'}
-                </button>
-              ))}
-            </div>
-            {/* Year Selector - only show when period is 'year' */}
-            {period === 'year' && availableYears.length > 0 && (
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="px-3 py-1.5 text-xs font-medium rounded-lg bg-[var(--gray-100)] border-0 focus:ring-2 focus:ring-[var(--black)] cursor-pointer"
-              >
-                {availableYears.map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            )}
-            {/* Total Revenue */}
-            <div className="text-right pl-4 border-l border-[var(--gray-200)]">
-              <p className="text-2xl font-bold text-[var(--black)]">{formatCurrency(totalRevenue)}</p>
-              <p className="text-xs text-[var(--gray-500)]">Total</p>
-            </div>
-          </div>
-        </div>
-        {filteredRevenue.length === 0 ? (
-          <div className="flex items-center justify-center h-64 text-[var(--gray-500)]">
-            <p className="text-sm">No revenue data for this period. Add projects with revenue to see the chart.</p>
-          </div>
-        ) : (
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={filteredRevenue} margin={{ top: 5, right: 20, left: 0, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 10, fill: '#6B7280' }}
-                  axisLine={false}
-                  tickLine={false}
-                  interval={0}
-                />
-                <YAxis
-                  tick={{ fontSize: 11, fill: '#6B7280' }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(value) => formatCurrency(value)}
-                  width={60}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                  }}
-                  labelFormatter={(_, payload) => {
-                    if (payload && payload[0]) {
-                      const date = new Date(payload[0].payload.date);
-                      if (period === 'lifetime') {
-                        return date.getFullYear().toString();
-                      } else if (period === 'year') {
-                        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-                      }
-                      return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-                    }
-                    return '';
-                  }}
-                  formatter={(value, name, props) => {
-                    const periodRevenue = props.payload.revenue;
-                    return [
-                      `${formatCurrency(value as number)} (${periodRevenue > 0 ? '+' : ''}${formatCurrency(periodRevenue)})`,
-                      'Cumulative'
-                    ];
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="cumulative"
-                  stroke="#000000"
-                  strokeWidth={2}
-                  dot={period === 'month' ? false : { fill: '#000000', strokeWidth: 0, r: 3 }}
-                  activeDot={{ fill: '#000000', strokeWidth: 0, r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        )}
-      </motion.div>
-
-      {/* Stats Cards */}
-      <motion.div
-        className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-        variants={containerVariants}
-      >
-        {cards.map((card, index) => {
-          const Icon = card.icon;
+      {/* Stats Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        {stats.map((stat, index) => {
+          const Icon = stat.icon;
           return (
-            <motion.div key={card.title} variants={itemVariants}>
+            <motion.div
+              key={stat.title}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
               <Link
-                href={card.href}
-                className="group relative block rounded-2xl border border-[var(--gray-200)] bg-white p-6 transition-all duration-300 hover:border-[var(--gray-300)] hover:shadow-xl hover:shadow-black/5 overflow-hidden"
+                href={stat.href}
+                className="group block p-4 bg-white border border-[var(--gray-200)] rounded-xl hover:border-[var(--gray-300)] transition-colors duration-200"
               >
-                {/* Background Gradient */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${card.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-
-                {/* Content */}
-                <div className="relative">
-                  <div className="flex items-start justify-between mb-4">
-                    <motion.div
-                      className={`flex h-12 w-12 items-center justify-center rounded-xl ${card.iconBg} text-white shadow-lg`}
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      transition={{ type: 'spring', stiffness: 400 }}
-                    >
-                      <Icon className="h-6 w-6" />
-                    </motion.div>
-                    <ArrowRight className="h-5 w-5 text-[var(--gray-400)] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--gray-100)]">
+                    <Icon className="h-4 w-4 text-[var(--gray-500)]" />
                   </div>
-
-                  <div className="space-y-1">
-                    <div className="flex items-baseline gap-2">
-                      <motion.span
-                        className="text-4xl font-bold text-[var(--black)]"
-                        initial={{ opacity: 0, scale: 0.5 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.2 + index * 0.1, type: 'spring' }}
-                      >
-                        {card.total}
-                      </motion.span>
-                      {'published' in card && (
-                        <span className="text-sm text-[var(--gray-500)]">
-                          ({card.published} live)
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="font-semibold text-[var(--black)]">{card.title}</h3>
-                    <p className="text-sm text-[var(--gray-500)]">{card.description}</p>
-                  </div>
-
-                  {/* Progress bar for publishable content */}
-                  {'published' in card && card.total > 0 && (
-                    <div className="mt-4 pt-4 border-t border-[var(--gray-100)]">
-                      <div className="flex items-center justify-between text-xs text-[var(--gray-500)] mb-2">
-                        <span>Published</span>
-                        <span>{Math.round((card.published! / card.total) * 100)}%</span>
-                      </div>
-                      <div className="h-1.5 bg-[var(--gray-100)] rounded-full overflow-hidden">
-                        <motion.div
-                          className={`h-full ${card.iconBg} rounded-full`}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(card.published! / card.total) * 100}%` }}
-                          transition={{ delay: 0.5 + index * 0.1, duration: 0.8, ease: 'easeOut' }}
-                        />
-                      </div>
-                    </div>
+                  <ArrowRight className="h-4 w-4 text-[var(--gray-300)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <div className="text-2xl font-semibold text-[var(--black)]">
+                  {stat.count}
+                </div>
+                <div className="text-xs text-[var(--gray-500)] mt-0.5">
+                  {stat.title}
+                  {'published' in stat && stat.count > 0 && (
+                    <span className="text-[var(--gray-400)]"> · {stat.published} live</span>
                   )}
                 </div>
               </Link>
             </motion.div>
           );
         })}
-      </motion.div>
+      </div>
+
+      {/* Revenue Charts - 2/3 Line Chart + 1/3 Donut Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Revenue Line Chart - 2/3 width */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="lg:col-span-2 p-5 bg-white border border-[var(--gray-200)] rounded-xl"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--gray-100)]">
+                <DollarSign className="h-4 w-4 text-[var(--gray-500)]" />
+              </div>
+              <div>
+                <h2 className="text-sm font-medium text-[var(--black)]">Revenue</h2>
+                <p className="text-xs text-[var(--gray-500)]">
+                  {period === 'month' ? 'Last 30 days' : period === 'year' ? `Year ${selectedYear}` : 'All time'}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex rounded-lg bg-[var(--gray-100)] p-0.5">
+                {(['month', 'year', 'lifetime'] as const).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => setPeriod(p)}
+                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                      period === p
+                        ? 'bg-white text-[var(--black)] shadow-sm'
+                        : 'text-[var(--gray-500)] hover:text-[var(--black)]'
+                    }`}
+                  >
+                    {p === 'month' ? '1M' : p === 'year' ? '1Y' : 'All'}
+                  </button>
+                ))}
+              </div>
+              {period === 'year' && availableYears.length > 0 && (
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  className="px-2 py-1 text-xs font-medium rounded-lg bg-[var(--gray-100)] border-0 cursor-pointer"
+                >
+                  {availableYears.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              )}
+              <div className="text-right pl-3 border-l border-[var(--gray-200)]">
+                <p className="text-lg font-semibold text-[var(--black)]">{formatCurrency(totalRevenue)}</p>
+              </div>
+            </div>
+          </div>
+          {filteredRevenue.length === 0 ? (
+            <div className="flex items-center justify-center h-48 text-[var(--gray-400)]">
+              <p className="text-sm">No revenue data available</p>
+            </div>
+          ) : (
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={filteredRevenue} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--gray-100)" vertical={false} />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 10, fill: 'var(--gray-400)' }}
+                    axisLine={false}
+                    tickLine={false}
+                    interval={0}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 10, fill: 'var(--gray-400)' }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(value) => formatCurrency(value)}
+                    width={50}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid var(--gray-200)',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                    }}
+                    labelFormatter={(_, payload) => {
+                      if (payload && payload[0]) {
+                        const date = new Date(payload[0].payload.date);
+                        if (period === 'lifetime') return date.getFullYear().toString();
+                        if (period === 'year') return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                      }
+                      return '';
+                    }}
+                    formatter={(value) => [formatCurrency(value as number), 'Total']}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="cumulative"
+                    stroke="var(--black)"
+                    strokeWidth={1.5}
+                    dot={false}
+                    activeDot={{ fill: 'var(--black)', strokeWidth: 0, r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Revenue by Category - Donut Chart - 1/3 width */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="p-5 bg-white border border-[var(--gray-200)] rounded-xl"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--gray-100)]">
+              <Tag className="h-4 w-4 text-[var(--gray-500)]" />
+            </div>
+            <div>
+              <h2 className="text-sm font-medium text-[var(--black)]">By Category</h2>
+              <p className="text-xs text-[var(--gray-500)]">Revenue distribution</p>
+            </div>
+          </div>
+          {categoryRevenue.length === 0 ? (
+            <div className="flex items-center justify-center h-48 text-[var(--gray-400)]">
+              <p className="text-sm">No category data</p>
+            </div>
+          ) : (
+            <>
+              <div className="h-36 relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={categoryRevenue}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={40}
+                      outerRadius={60}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {categoryRevenue.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#fff',
+                        border: '1px solid var(--gray-200)',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                      }}
+                      formatter={(value) => [formatCurrency(value as number), 'Revenue']}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-3 space-y-1.5 max-h-24 overflow-y-auto">
+                {categoryRevenue.slice(0, 5).map((category, index) => (
+                  <div key={category.name} className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: PIE_COLORS[index % PIE_COLORS.length] }}
+                      />
+                      <span className="text-[var(--gray-600)] truncate max-w-[100px]">{category.name}</span>
+                    </div>
+                    <span className="font-medium text-[var(--black)]">{formatCurrency(category.value)}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </motion.div>
+      </div>
 
       {/* Quick Actions */}
       <motion.div
-        variants={itemVariants}
-        className="rounded-2xl border border-[var(--gray-200)] bg-white p-6"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
       >
-        <div className="flex items-center gap-3 mb-5">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--gray-100)]">
-            <TrendingUp className="w-4 h-4 text-[var(--gray-600)]" />
-          </div>
-          <h2 className="text-lg font-semibold text-[var(--black)]">Quick Actions</h2>
-        </div>
+        <h2 className="text-sm font-medium text-[var(--gray-500)] mb-3">Quick Actions</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {quickActions.map((action, index) => {
             const Icon = action.icon;
             return (
-              <motion.div
+              <Link
                 key={action.label}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 + index * 0.1 }}
+                href={action.href}
+                className="group flex items-center gap-3 p-3 bg-white border border-[var(--gray-200)] rounded-xl hover:border-[var(--gray-300)] transition-colors duration-200"
               >
-                <Link
-                  href={action.href}
-                  className={`group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
-                    action.primary
-                      ? 'bg-[var(--black)] text-white hover:bg-[var(--gray-800)] shadow-lg shadow-black/10'
-                      : 'bg-[var(--gray-50)] text-[var(--gray-700)] hover:bg-[var(--gray-100)]'
-                  }`}
-                >
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-300 ${
-                    action.primary
-                      ? 'bg-white/10'
-                      : 'bg-white shadow-sm'
-                  }`}>
-                    {action.primary ? (
-                      <Plus className="w-4 h-4" />
-                    ) : (
-                      <Icon className="w-4 h-4" />
-                    )}
-                  </div>
-                  <span className="flex-1">{action.label}</span>
-                  <ArrowRight className={`w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 ${
-                    action.primary ? 'text-white/70' : 'text-[var(--gray-400)]'
-                  }`} />
-                </Link>
-              </motion.div>
+                <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-[var(--gray-100)] group-hover:bg-[var(--gray-200)] transition-colors">
+                  {index === 0 || index === 1 ? (
+                    <Plus className="h-4 w-4 text-[var(--gray-600)]" />
+                  ) : (
+                    <Icon className="h-4 w-4 text-[var(--gray-600)]" />
+                  )}
+                </div>
+                <span className="text-sm font-medium text-[var(--gray-700)]">{action.label}</span>
+              </Link>
             );
           })}
         </div>
       </motion.div>
-    </motion.div>
+
+      {/* Leads Section */}
+      {leadsData.count > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-purple-100">
+                <UserCheck className="h-4 w-4 text-purple-600" />
+              </div>
+              <div>
+                <h2 className="text-sm font-medium text-[var(--black)]">Sales Leads</h2>
+                <p className="text-xs text-[var(--gray-500)]">
+                  {leadsData.count} total · {formatCurrency(leadsData.stats.totalValue)} pipeline
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/admin/leads"
+              className="text-xs text-[var(--gray-500)] hover:text-[var(--black)] transition-colors"
+            >
+              View all
+            </Link>
+          </div>
+
+          {/* Lead Status Summary */}
+          <div className="grid grid-cols-5 gap-2 mb-4">
+            {(['new', 'contacted', 'qualified', 'won', 'lost'] as const).map((status) => (
+              <div
+                key={status}
+                className="p-3 bg-white border border-[var(--gray-200)] rounded-lg text-center"
+              >
+                <div className="text-lg font-semibold text-[var(--black)]">
+                  {leadsData.stats[status]}
+                </div>
+                <div className="text-xs text-[var(--gray-500)]">{LEAD_STATUS_LABELS[status]}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Recent Leads Table */}
+          {leadsData.recentLeads.length > 0 && (
+            <div className="bg-white border border-[var(--gray-200)] rounded-xl overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-[var(--gray-100)]">
+                    <th className="text-left text-xs font-medium text-[var(--gray-500)] uppercase tracking-wider px-4 py-3">
+                      Lead
+                    </th>
+                    <th className="text-left text-xs font-medium text-[var(--gray-500)] uppercase tracking-wider px-4 py-3">
+                      Sales Rep
+                    </th>
+                    <th className="text-left text-xs font-medium text-[var(--gray-500)] uppercase tracking-wider px-4 py-3">
+                      Status
+                    </th>
+                    <th className="text-right text-xs font-medium text-[var(--gray-500)] uppercase tracking-wider px-4 py-3">
+                      Value
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leadsData.recentLeads.map((lead, index) => (
+                    <tr
+                      key={lead.id}
+                      className={`hover:bg-[var(--gray-50)] transition-colors ${
+                        index !== leadsData.recentLeads.length - 1 ? 'border-b border-[var(--gray-100)]' : ''
+                      }`}
+                    >
+                      <td className="px-4 py-3">
+                        <div className="font-medium text-sm text-[var(--black)]">{lead.name}</div>
+                        {lead.company && (
+                          <div className="text-xs text-[var(--gray-500)]">{lead.company}</div>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-[var(--gray-600)]">
+                        {lead.sales_user?.name || '-'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ${LEAD_STATUS_STYLES[lead.status]}`}
+                        >
+                          {LEAD_STATUS_LABELS[lead.status]}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-[var(--black)] font-medium text-right">
+                        {formatCurrency(lead.value)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </motion.div>
+      )}
+    </div>
   );
 }

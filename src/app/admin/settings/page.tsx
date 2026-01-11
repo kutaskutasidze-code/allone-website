@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import type { ContactInfo } from '@/types/database';
-import { Save, Check, Mail, MapPin, Phone, Settings, AlertCircle } from 'lucide-react';
+import { Save, Check, X } from 'lucide-react';
 
 export default function SettingsPage() {
   const [formData, setFormData] = useState<Partial<ContactInfo>>({
@@ -73,137 +72,92 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <motion.div
-          className="w-8 h-8 border-2 border-[var(--gray-300)] border-t-[var(--accent)] rounded-full"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        />
+        <div className="w-6 h-6 border-2 border-[var(--gray-200)] border-t-[var(--black)] rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <motion.div
-      className="max-w-2xl space-y-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      {/* Header */}
+    <div className="max-w-xl space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-[var(--gray-700)] text-white">
-              <Settings className="w-5 h-5" />
-            </div>
-            <h1 className="text-3xl font-[var(--font-display)] font-bold tracking-tight text-[var(--black)]">
-              Settings
-            </h1>
-          </div>
-          <p className="text-[var(--gray-500)]">
-            Manage your website contact information
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--black)]">Contact</h1>
+          <p className="mt-1 text-sm text-[var(--gray-500)]">Manage your website contact information</p>
         </div>
-        <motion.button
+        <button
           onClick={handleSave}
           disabled={isSaving || !formData.email || !formData.location}
-          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--black)] text-white rounded-xl font-medium shadow-lg shadow-black/10 hover:bg-[var(--gray-800)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[var(--black)] rounded-lg hover:bg-[var(--gray-800)] disabled:opacity-50"
         >
           {saved ? (
             <>
-              <Check className="w-4 h-4" />
-              Saved!
+              <Check className="h-4 w-4" />
+              Saved
             </>
           ) : (
             <>
-              <Save className="w-4 h-4" />
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              <Save className="h-4 w-4" />
+              {isSaving ? 'Saving...' : 'Save'}
             </>
           )}
-        </motion.button>
+        </button>
       </div>
 
       {/* Error Message */}
       {error && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600"
-        >
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          <span>{error}</span>
-        </motion.div>
+        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm">
+          <span className="flex-1">{error}</span>
+          <button onClick={() => setError('')} className="text-red-400 hover:text-red-600">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       )}
 
       {/* Form */}
-      <div className="rounded-2xl border border-[var(--gray-200)] bg-white p-6">
-        <h2 className="text-lg font-semibold text-[var(--black)] mb-2">
-          Contact Information
-        </h2>
-        <p className="text-sm text-[var(--gray-500)] mb-6">
-          This information is displayed on the contact page and in the footer.
-        </p>
-
-        <div className="space-y-6">
-          <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--gray-100)]">
-              <Mail className="h-5 w-5 text-[var(--gray-600)]" />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-[var(--gray-700)] mb-1.5">
-                Email Address <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                value={formData.email || ''}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="hello@allone.ai"
-                required
-                className="w-full px-4 py-3 rounded-xl bg-[var(--gray-50)] border border-[var(--gray-200)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/10 transition-all"
-              />
-            </div>
+      <div className="rounded-xl border border-[var(--gray-200)] bg-white p-5">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wider text-[var(--gray-500)] mb-2">
+              Email Address <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="email"
+              value={formData.email || ''}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="hello@allone.ai"
+              required
+              className="w-full px-0 py-2 text-sm bg-transparent border-0 border-b border-[var(--gray-200)] focus:border-[var(--black)] focus:outline-none transition-colors"
+            />
           </div>
 
-          <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--gray-100)]">
-              <MapPin className="h-5 w-5 text-[var(--gray-600)]" />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-[var(--gray-700)] mb-1.5">
-                Location <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={formData.location || ''}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="San Francisco, CA"
-                required
-                className="w-full px-4 py-3 rounded-xl bg-[var(--gray-50)] border border-[var(--gray-200)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/10 transition-all"
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wider text-[var(--gray-500)] mb-2">
+              Location <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              value={formData.location || ''}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              placeholder="San Francisco, CA"
+              required
+              className="w-full px-0 py-2 text-sm bg-transparent border-0 border-b border-[var(--gray-200)] focus:border-[var(--black)] focus:outline-none transition-colors"
+            />
           </div>
 
-          <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--gray-100)]">
-              <Phone className="h-5 w-5 text-[var(--gray-600)]" />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-[var(--gray-700)] mb-1.5">
-                Phone Number <span className="text-[var(--gray-400)]">(optional)</span>
-              </label>
-              <input
-                type="tel"
-                value={formData.phone || ''}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+1 (555) 123-4567"
-                className="w-full px-4 py-3 rounded-xl bg-[var(--gray-50)] border border-[var(--gray-200)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/10 transition-all"
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wider text-[var(--gray-500)] mb-2">
+              Phone Number <span className="text-[var(--gray-400)]">(optional)</span>
+            </label>
+            <input
+              type="tel"
+              value={formData.phone || ''}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              placeholder="+1 (555) 123-4567"
+              className="w-full px-0 py-2 text-sm bg-transparent border-0 border-b border-[var(--gray-200)] focus:border-[var(--black)] focus:outline-none transition-colors"
+            />
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

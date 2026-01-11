@@ -63,11 +63,94 @@ async function getDailyRevenue() {
   });
 }
 
+async function getRevenueByCategory() {
+  const supabase = await createClient();
+
+  // Get all projects with revenue and category
+  const { data: projects } = await supabase
+    .from('projects')
+    .select('revenue, category')
+    .not('category', 'is', null);
+
+  if (!projects || projects.length === 0) {
+    return [];
+  }
+
+  // Group revenue by category
+  const categoryData: Record<string, number> = {};
+
+  projects.forEach((project) => {
+    if (project.category) {
+      categoryData[project.category] = (categoryData[project.category] || 0) + (project.revenue || 0);
+    }
+  });
+
+  // Convert to array and sort by revenue descending
+  return Object.entries(categoryData)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+}
+
+async function getLeadsData() {
+  const supabase = await createClient();
+
+  // Get leads count
+  const { count: leadsCount } = await supabase
+    .from('leads')
+    .select('id', { count: 'exact' });
+
+  // Get recent leads with sales user info
+  const { data: recentLeads } = await supabase
+    .from('leads')
+    .select(`
+      *,
+      sales_user:sales_users(id, name, email)
+    `)
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  // Get leads by status
+  const { data: allLeads } = await supabase
+    .from('leads')
+    .select('status, value');
+
+  const leadStats = {
+    new: 0,
+    contacted: 0,
+    qualified: 0,
+    won: 0,
+    lost: 0,
+    totalValue: 0,
+  };
+
+  if (allLeads) {
+    allLeads.forEach(lead => {
+      leadStats[lead.status as keyof typeof leadStats]++;
+      leadStats.totalValue += lead.value || 0;
+    });
+  }
+
+  return {
+    count: leadsCount || 0,
+    recentLeads: recentLeads || [],
+    stats: leadStats,
+  };
+}
+
 export default async function AdminDashboard() {
-  const [counts, dailyRevenue] = await Promise.all([
+  const [counts, dailyRevenue, categoryRevenue, leadsData] = await Promise.all([
     getStats(),
     getDailyRevenue(),
+    getRevenueByCategory(),
+    getLeadsData(),
   ]);
 
-  return <DashboardContent counts={counts} dailyRevenue={dailyRevenue} />;
+  return (
+    <DashboardContent
+      counts={counts}
+      dailyRevenue={dailyRevenue}
+      categoryRevenue={categoryRevenue}
+      leadsData={leadsData}
+    />
+  );
 }

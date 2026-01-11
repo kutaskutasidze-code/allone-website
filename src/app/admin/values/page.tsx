@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { ConfirmDialog } from '@/components/admin';
+import { ConfirmDialog, PageHeader, EmptyState } from '@/components/admin';
 import { Input, Textarea } from '@/components/ui';
 import type { CompanyValue } from '@/types/database';
-import { Plus, Pencil, Trash2, Save, X } from 'lucide-react';
+import { Pencil, Trash2, Heart, X, Save } from 'lucide-react';
 
 export default function ValuesPage() {
   const [values, setValues] = useState<CompanyValue[]>([]);
@@ -111,39 +112,27 @@ export default function ValuesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin h-8 w-8 border-2 border-black border-t-transparent rounded-full" />
+        <div className="w-6 h-6 border-2 border-[var(--gray-200)] border-t-[var(--black)] rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-black">
-            Company Values
-          </h1>
-          <p className="mt-2 text-[var(--gray-600)]">
-            Edit your company values displayed on the About page
-          </p>
-        </div>
-        <button
-          onClick={() => setShowAddForm(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--gray-800)]"
-        >
-          <Plus className="h-4 w-4" />
-          Add Value
-        </button>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Values"
+        description={`${values.length} value${values.length !== 1 ? 's' : ''}`}
+        action={{ label: 'Add Value', onClick: () => setShowAddForm(true) }}
+      />
 
       {/* Add Form Modal */}
       {showAddForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowAddForm(false)} />
-          <div className="relative z-10 w-full max-w-md bg-white rounded-xl p-6 mx-4">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setShowAddForm(false)} />
+          <div className="relative z-10 w-full max-w-md bg-white rounded-xl p-6 mx-4 border border-[var(--gray-200)]">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold">Add New Value</h2>
-              <button onClick={() => setShowAddForm(false)} className="text-[var(--gray-400)] hover:text-black">
+              <h2 className="text-base font-medium text-[var(--black)]">Add Value</h2>
+              <button onClick={() => setShowAddForm(false)} className="text-[var(--gray-400)] hover:text-[var(--black)]">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -174,15 +163,14 @@ export default function ValuesPage() {
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="px-4 py-2 text-sm text-[var(--gray-600)] hover:text-black"
+                  className="px-4 py-2 text-sm text-[var(--gray-600)] hover:text-[var(--black)]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-[var(--gray-800)]"
+                  className="px-4 py-2 text-sm font-medium text-white bg-[var(--black)] rounded-lg hover:bg-[var(--gray-800)]"
                 >
-                  <Plus className="h-4 w-4" />
                   Add Value
                 </button>
               </div>
@@ -192,21 +180,21 @@ export default function ValuesPage() {
       )}
 
       {values.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-[var(--gray-300)] bg-white p-12 text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--gray-100)]">
-            <Plus className="h-6 w-6 text-[var(--gray-400)]" />
-          </div>
-          <h3 className="mt-4 text-lg font-medium text-black">No values yet</h3>
-          <p className="mt-2 text-sm text-[var(--gray-500)]">
-            Add company values to display on your About page.
-          </p>
-        </div>
+        <EmptyState
+          icon={Heart}
+          title="No values yet"
+          description="Add company values to display on your About page."
+          action={{ label: 'Add Value', onClick: () => setShowAddForm(true) }}
+        />
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2">
-          {values.map((value) => (
-            <div
+        <div className="grid gap-3 sm:grid-cols-2">
+          {values.map((value, index) => (
+            <motion.div
               key={value.id}
-              className="rounded-xl border border-[var(--gray-200)] bg-white p-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.03 }}
+              className="p-5 bg-white border border-[var(--gray-200)] rounded-xl"
             >
               {editingId === value.id ? (
                 <div className="space-y-4">
@@ -229,13 +217,13 @@ export default function ValuesPage() {
                   <div className="flex justify-end gap-2 pt-2">
                     <button
                       onClick={() => setEditingId(null)}
-                      className="px-3 py-1.5 text-sm text-[var(--gray-600)] hover:text-black"
+                      className="px-3 py-1.5 text-sm text-[var(--gray-600)] hover:text-[var(--black)]"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={() => handleUpdate(value.id)}
-                      className="inline-flex items-center gap-1 rounded-lg bg-black px-3 py-1.5 text-sm font-medium text-white hover:bg-[var(--gray-800)]"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-white bg-[var(--black)] rounded-lg hover:bg-[var(--gray-800)]"
                     >
                       <Save className="h-3.5 w-3.5" />
                       Save
@@ -244,32 +232,32 @@ export default function ValuesPage() {
                 </div>
               ) : (
                 <>
-                  <div className="flex items-start justify-between mb-4">
-                    <span className="text-4xl font-bold text-[var(--gray-200)]">
+                  <div className="flex items-start justify-between mb-3">
+                    <span className="text-3xl font-semibold text-[var(--gray-200)]">
                       {value.number}
                     </span>
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => startEdit(value)}
-                        className="rounded-lg p-2 text-[var(--gray-500)] hover:bg-[var(--gray-100)] hover:text-black"
+                        className="p-2 rounded-lg text-[var(--gray-400)] hover:text-[var(--black)] hover:bg-[var(--gray-100)]"
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => setDeleteId(value.id)}
-                        className="rounded-lg p-2 text-[var(--gray-500)] hover:bg-red-50 hover:text-red-600"
+                        className="p-2 rounded-lg text-[var(--gray-400)] hover:text-red-600 hover:bg-red-50"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-black">{value.title}</h3>
-                  <p className="mt-2 text-sm text-[var(--gray-600)] line-clamp-3">
+                  <h3 className="text-sm font-medium text-[var(--black)]">{value.title}</h3>
+                  <p className="mt-1 text-xs text-[var(--gray-500)] line-clamp-2">
                     {value.description}
                   </p>
                 </>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

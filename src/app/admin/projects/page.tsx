@@ -3,23 +3,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { ConfirmDialog } from '@/components/admin';
+import { ConfirmDialog, PageHeader, EmptyState } from '@/components/admin';
 import type { Project } from '@/types/database';
 import {
-  Plus,
   Pencil,
   Trash2,
-  Eye,
-  EyeOff,
   Search,
-  Filter,
   X,
   FolderKanban,
   ImageIcon,
-  Calendar,
-  DollarSign,
 } from 'lucide-react';
 
 export default function ProjectsPage() {
@@ -64,7 +58,6 @@ export default function ProjectsPage() {
 
   const filteredProjects = useMemo(() => {
     return projects.filter((project) => {
-      // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesTitle = project.title.toLowerCase().includes(query);
@@ -72,14 +65,9 @@ export default function ProjectsPage() {
         const matchesTech = project.technologies.some(t => t.toLowerCase().includes(query));
         if (!matchesTitle && !matchesDescription && !matchesTech) return false;
       }
-
-      // Category filter
       if (categoryFilter !== 'all' && project.category !== categoryFilter) return false;
-
-      // Status filter
       if (statusFilter === 'published' && !project.is_published) return false;
       if (statusFilter === 'draft' && project.is_published) return false;
-
       return true;
     });
   }, [projects, searchQuery, categoryFilter, statusFilter]);
@@ -128,264 +116,169 @@ export default function ProjectsPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <motion.div
-          className="w-8 h-8 border-2 border-[var(--gray-300)] border-t-[var(--accent)] rounded-full"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        />
+        <div className="w-6 h-6 border-2 border-[var(--gray-200)] border-t-[var(--black)] rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <motion.div
-      className="space-y-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-500 text-white">
-              <FolderKanban className="w-5 h-5" />
-            </div>
-            <h1 className="text-3xl font-[var(--font-display)] font-bold tracking-tight text-[var(--black)]">
-              Projects
-            </h1>
-          </div>
-          <p className="text-[var(--gray-500)]">
-            Manage your portfolio projects. {projects.length} total, {projects.filter(p => p.is_published).length} published.
-          </p>
-        </div>
-        <Link
-          href="/admin/projects/new"
-          className="flex items-center gap-2 px-4 py-2.5 bg-[var(--black)] text-white rounded-xl font-medium shadow-lg shadow-black/10 hover:bg-[var(--gray-800)] transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Project
-        </Link>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Projects"
+        description={`${projects.length} total, ${projects.filter(p => p.is_published).length} published`}
+        action={{ label: 'Add Project', href: '/admin/projects/new' }}
+      />
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        {/* Search */}
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--gray-400)]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--gray-400)]" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search projects..."
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white border border-[var(--gray-200)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/10 transition-all"
+            className="w-full pl-9 pr-8 py-2 text-sm rounded-lg bg-white border border-[var(--gray-200)] focus:border-[var(--gray-400)] focus:outline-none transition-colors"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--gray-400)] hover:text-[var(--black)]"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--gray-400)] hover:text-[var(--black)]"
             >
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        {/* Category Filter */}
-        <div className="relative">
-          <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--gray-400)]" />
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="appearance-none pl-10 pr-10 py-3 rounded-xl bg-white border border-[var(--gray-200)] focus:border-[var(--accent)] focus:outline-none cursor-pointer min-w-[160px]"
-          >
-            <option value="all">All Categories</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-        </div>
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          className="px-3 py-2 text-sm rounded-lg bg-white border border-[var(--gray-200)] focus:border-[var(--gray-400)] focus:outline-none cursor-pointer"
+        >
+          <option value="all">All Categories</option>
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
 
-        {/* Status Filter */}
-        <div className="flex rounded-xl bg-white border border-[var(--gray-200)] overflow-hidden">
+        <div className="flex rounded-lg border border-[var(--gray-200)] bg-white overflow-hidden">
           {(['all', 'published', 'draft'] as const).map((status) => (
             <button
               key={status}
               onClick={() => setStatusFilter(status)}
-              className={`px-4 py-3 text-sm font-medium transition-colors ${
+              className={`px-3 py-2 text-sm font-medium transition-colors ${
                 statusFilter === status
-                  ? 'bg-[var(--black)] text-white'
+                  ? 'bg-[var(--gray-900)] text-white'
                   : 'text-[var(--gray-600)] hover:bg-[var(--gray-50)]'
               }`}
             >
-              {status === 'all' ? 'All' : status === 'published' ? 'Published' : 'Drafts'}
+              {status === 'all' ? 'All' : status === 'published' ? 'Live' : 'Draft'}
             </button>
           ))}
         </div>
       </div>
 
       {/* Active Filters */}
-      <AnimatePresence>
-        {hasActiveFilters && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-2"
+      {hasActiveFilters && (
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-[var(--gray-500)]">
+            {filteredProjects.length} of {projects.length}
+          </span>
+          <button
+            onClick={clearFilters}
+            className="text-[var(--gray-500)] hover:text-[var(--black)] underline"
           >
-            <span className="text-sm text-[var(--gray-500)]">
-              Showing {filteredProjects.length} of {projects.length} projects
-            </span>
-            <button
-              onClick={clearFilters}
-              className="text-sm text-[var(--accent)] hover:underline"
-            >
-              Clear filters
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            Clear
+          </button>
+        </div>
+      )}
 
       {/* Projects List */}
       {projects.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[var(--gray-300)] bg-white p-12 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--gray-100)]">
-            <FolderKanban className="h-8 w-8 text-[var(--gray-400)]" />
-          </div>
-          <h3 className="mt-4 text-lg font-semibold text-[var(--black)]">No projects yet</h3>
-          <p className="mt-2 text-[var(--gray-500)]">
-            Get started by creating your first project.
-          </p>
-          <Link
-            href="/admin/projects/new"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--black)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--gray-800)]"
-          >
-            <Plus className="h-4 w-4" />
-            Add Project
-          </Link>
-        </div>
+        <EmptyState
+          icon={FolderKanban}
+          title="No projects yet"
+          description="Get started by creating your first project."
+          action={{ label: 'Add Project', href: '/admin/projects/new' }}
+        />
       ) : filteredProjects.length === 0 ? (
-        <div className="rounded-2xl border border-[var(--gray-200)] bg-white p-12 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--gray-100)]">
-            <Search className="h-8 w-8 text-[var(--gray-400)]" />
-          </div>
-          <h3 className="mt-4 text-lg font-semibold text-[var(--black)]">No results found</h3>
-          <p className="mt-2 text-[var(--gray-500)]">
-            Try adjusting your search or filter criteria.
-          </p>
+        <div className="py-12 text-center">
+          <p className="text-sm text-[var(--gray-500)]">No projects match your filters.</p>
           <button
             onClick={clearFilters}
-            className="mt-4 text-sm text-[var(--accent)] hover:underline"
+            className="mt-2 text-sm text-[var(--gray-600)] hover:text-[var(--black)] underline"
           >
             Clear all filters
           </button>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="space-y-2">
           {filteredProjects.map((project, index) => (
             <motion.div
               key={project.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="group rounded-2xl border border-[var(--gray-200)] bg-white p-5 hover:border-[var(--gray-300)] hover:shadow-lg hover:shadow-black/5 transition-all duration-300"
+              transition={{ delay: index * 0.03 }}
+              className="group flex items-center gap-4 p-4 bg-white border border-[var(--gray-200)] rounded-xl hover:border-[var(--gray-300)] transition-colors"
             >
-              <div className="flex items-start gap-5">
-                {/* Image Preview */}
-                <div className="flex-shrink-0 w-20 h-20 rounded-xl bg-[var(--gray-100)] overflow-hidden">
-                  {project.image_url ? (
-                    <Image
-                      src={project.image_url}
-                      alt={project.title}
-                      width={80}
-                      height={80}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <ImageIcon className="w-8 h-8 text-[var(--gray-400)]" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="font-semibold text-[var(--black)] group-hover:text-[var(--accent)] transition-colors">
-                        {project.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-[var(--gray-500)] line-clamp-2">
-                        {project.description}
-                      </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Link
-                        href={`/admin/projects/${project.id}`}
-                        className="p-2 rounded-lg text-[var(--gray-500)] hover:bg-[var(--accent)]/5 hover:text-[var(--accent)] transition-colors"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Link>
-                      <button
-                        onClick={() => setDeleteId(project.id)}
-                        className="p-2 rounded-lg text-[var(--gray-500)] hover:bg-red-50 hover:text-red-600 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+              {/* Image */}
+              <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--gray-100)] overflow-hidden">
+                {project.image_url ? (
+                  <Image
+                    src={project.image_url}
+                    alt={project.title}
+                    width={48}
+                    height={48}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <ImageIcon className="w-5 h-5 text-[var(--gray-400)]" />
                   </div>
+                )}
+              </div>
 
-                  {/* Meta */}
-                  <div className="mt-3 flex items-center gap-3 flex-wrap">
-                    <span className="inline-flex rounded-lg bg-[var(--gray-100)] px-2.5 py-1 text-xs font-medium text-[var(--gray-700)]">
-                      {project.category}
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-lg bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-600">
-                      <Calendar className="w-3 h-3" />
-                      {new Date(project.project_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                    </span>
-                    {project.revenue > 0 && (
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600">
-                        <DollarSign className="w-3 h-3" />
-                        {project.revenue >= 1000 ? `${(project.revenue / 1000).toFixed(1)}K` : project.revenue.toFixed(0)}
-                      </span>
-                    )}
-                    {project.technologies.slice(0, 2).map((tech) => (
-                      <span
-                        key={tech}
-                        className="inline-flex rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                    {project.technologies.length > 2 && (
-                      <span className="text-xs text-[var(--gray-500)]">
-                        +{project.technologies.length - 2} more
-                      </span>
-                    )}
-                    <button
-                      onClick={() => togglePublished(project.id, project.is_published)}
-                      className={`ml-auto inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
-                        project.is_published
-                          ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
-                          : 'bg-[var(--gray-100)] text-[var(--gray-500)] hover:bg-[var(--gray-200)]'
-                      }`}
-                    >
-                      {project.is_published ? (
-                        <>
-                          <Eye className="w-3 h-3" />
-                          Published
-                        </>
-                      ) : (
-                        <>
-                          <EyeOff className="w-3 h-3" />
-                          Draft
-                        </>
-                      )}
-                    </button>
-                  </div>
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-medium text-[var(--black)] truncate">
+                    {project.title}
+                  </h3>
+                  <span className="flex-shrink-0 px-1.5 py-0.5 text-[10px] font-medium rounded bg-[var(--gray-100)] text-[var(--gray-600)]">
+                    {project.category}
+                  </span>
                 </div>
+                <p className="mt-0.5 text-xs text-[var(--gray-500)] truncate">
+                  {project.technologies.join(' · ')}
+                </p>
+              </div>
+
+              {/* Status */}
+              <button
+                onClick={() => togglePublished(project.id, project.is_published)}
+                className={`flex-shrink-0 px-2 py-1 text-xs font-medium rounded-md transition-colors ${
+                  project.is_published
+                    ? 'bg-[var(--gray-900)] text-white'
+                    : 'bg-[var(--gray-100)] text-[var(--gray-600)] hover:bg-[var(--gray-200)]'
+                }`}
+              >
+                {project.is_published ? 'Live' : 'Draft'}
+              </button>
+
+              {/* Actions */}
+              <div className="flex items-center gap-1">
+                <Link
+                  href={`/admin/projects/${project.id}`}
+                  className="p-2 rounded-lg text-[var(--gray-400)] hover:text-[var(--black)] hover:bg-[var(--gray-100)] transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                </Link>
+                <button
+                  onClick={() => setDeleteId(project.id)}
+                  className="p-2 rounded-lg text-[var(--gray-400)] hover:text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
             </motion.div>
           ))}
@@ -401,6 +294,6 @@ export default function ProjectsPage() {
         confirmText="Delete"
         isLoading={isDeleting}
       />
-    </motion.div>
+    </div>
   );
 }

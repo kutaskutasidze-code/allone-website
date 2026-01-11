@@ -73,7 +73,16 @@
       "Bash(node scripts/run-migration.mjs:*)",
       "Skill(code-audit)",
       "Bash(git push:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(netstat:*)",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(npx supabase:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout /t 2 /nobreak)",
+      "Bash(find:*)",
+      "Bash(while read f)",
+      "Bash(do wc -l \"$f\")",
+      "Bash(done)"
     ]
   }
 }

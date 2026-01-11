@@ -286,6 +286,73 @@ export interface Database {
           created_at?: string;
         };
       };
+      sales_users: {
+        Row: {
+          id: string;
+          email: string;
+          name: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          name: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          name?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      leads: {
+        Row: {
+          id: string;
+          sales_user_id: string | null;
+          name: string;
+          email: string | null;
+          phone: string | null;
+          company: string | null;
+          status: 'new' | 'contacted' | 'qualified' | 'won' | 'lost';
+          value: number;
+          source: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          sales_user_id?: string | null;
+          name: string;
+          email?: string | null;
+          phone?: string | null;
+          company?: string | null;
+          status?: 'new' | 'contacted' | 'qualified' | 'won' | 'lost';
+          value?: number;
+          source?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          sales_user_id?: string | null;
+          name?: string;
+          email?: string | null;
+          phone?: string | null;
+          company?: string | null;
+          status?: 'new' | 'contacted' | 'qualified' | 'won' | 'lost';
+          value?: number;
+          source?: string | null;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -331,3 +398,18 @@ export type AboutContentUpdate = Database['public']['Tables']['about_content']['
 export type Category = Database['public']['Tables']['categories']['Row'];
 export type CategoryInsert = Database['public']['Tables']['categories']['Insert'];
 export type CategoryUpdate = Database['public']['Tables']['categories']['Update'];
+
+export type SalesUser = Database['public']['Tables']['sales_users']['Row'];
+export type SalesUserInsert = Database['public']['Tables']['sales_users']['Insert'];
+export type SalesUserUpdate = Database['public']['Tables']['sales_users']['Update'];
+
+export type Lead = Database['public']['Tables']['leads']['Row'];
+export type LeadInsert = Database['public']['Tables']['leads']['Insert'];
+export type LeadUpdate = Database['public']['Tables']['leads']['Update'];
+
+export type LeadStatus = Lead['status'];
+
+// Lead with sales user info for admin view
+export interface LeadWithSalesUser extends Lead {
+  sales_user?: SalesUser | null;
+}

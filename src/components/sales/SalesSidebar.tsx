@@ -8,66 +8,40 @@ import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import {
   LayoutDashboard,
-  FolderKanban,
-  Settings,
-  Briefcase,
   Users,
-  BarChart3,
-  Heart,
-  FileText,
   LogOut,
   ExternalLink,
-  Tag,
-  UserCheck,
 } from 'lucide-react';
 
 const navigationSections = [
   {
     label: 'Overview',
     items: [
-      { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+      { name: 'Dashboard', href: '/sales', icon: LayoutDashboard },
     ],
   },
   {
-    label: 'Content',
+    label: 'Sales',
     items: [
-      { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
-      { name: 'Services', href: '/admin/services', icon: Briefcase },
-      { name: 'Clients', href: '/admin/clients', icon: Users },
-      { name: 'Leads', href: '/admin/leads', icon: UserCheck },
-    ],
-  },
-  {
-    label: 'Manage',
-    items: [
-      { name: 'Categories', href: '/admin/categories', icon: Tag },
-      { name: 'Stats', href: '/admin/stats', icon: BarChart3 },
-      { name: 'Values', href: '/admin/values', icon: Heart },
-    ],
-  },
-  {
-    label: 'Settings',
-    items: [
-      { name: 'About Page', href: '/admin/about', icon: FileText },
-      { name: 'Contact', href: '/admin/settings', icon: Settings },
+      { name: 'Leads', href: '/sales/leads', icon: Users },
     ],
   },
 ];
 
-export function AdminSidebar() {
+export function SalesSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/admin/login');
+    router.push('/sales/login');
     router.refresh();
   };
 
   const isActive = (href: string) => {
-    if (href === '/admin') {
-      return pathname === '/admin';
+    if (href === '/sales') {
+      return pathname === '/sales';
     }
     return pathname.startsWith(href);
   };
@@ -82,7 +56,7 @@ export function AdminSidebar() {
       <div className="flex h-full flex-col">
         {/* Logo Section */}
         <div className="flex h-16 items-center border-b border-[var(--gray-100)] px-5">
-          <Link href="/admin" className="flex items-center gap-3">
+          <Link href="/sales" className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg overflow-hidden bg-white border border-[var(--gray-200)]">
               <Image
                 src="/images/allone-logo.png"
@@ -93,9 +67,12 @@ export function AdminSidebar() {
                 priority
               />
             </div>
-            <span className="text-base font-semibold tracking-tight text-[var(--black)]">
-              Allone
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-base font-semibold tracking-tight text-[var(--black)]">
+                Allone
+              </span>
+              <span className="text-xs font-medium text-[var(--gray-400)]">Sales</span>
+            </div>
           </Link>
         </div>
 
