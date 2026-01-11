@@ -34,10 +34,13 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired
+  // Validate session with Supabase server (not just cookies)
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  const isAuthenticated = !!user && !error;
 
   // Protect admin routes (except login)
   if (
@@ -45,7 +48,7 @@ export async function middleware(request: NextRequest) {
     !request.nextUrl.pathname.startsWith('/admin/login') &&
     !request.nextUrl.pathname.startsWith('/api/')
   ) {
-    if (!session) {
+    if (!isAuthenticated) {
       const redirectUrl = new URL('/admin/login', request.url);
       return NextResponse.redirect(redirectUrl);
     }
@@ -57,7 +60,7 @@ export async function middleware(request: NextRequest) {
     !request.nextUrl.pathname.startsWith('/sales/login') &&
     !request.nextUrl.pathname.startsWith('/api/')
   ) {
-    if (!session) {
+    if (!isAuthenticated) {
       const redirectUrl = new URL('/sales/login', request.url);
       return NextResponse.redirect(redirectUrl);
     }
@@ -67,12 +70,12 @@ export async function middleware(request: NextRequest) {
   // The API routes handle their own auth responses
 
   // Redirect logged-in users away from admin login page
-  if (request.nextUrl.pathname === '/admin/login' && session) {
+  if (request.nextUrl.pathname === '/admin/login' && isAuthenticated) {
     return NextResponse.redirect(new URL('/admin', request.url));
   }
 
   // Redirect logged-in users away from sales login page
-  if (request.nextUrl.pathname === '/sales/login' && session) {
+  if (request.nextUrl.pathname === '/sales/login' && isAuthenticated) {
     return NextResponse.redirect(new URL('/sales', request.url));
   }
 
