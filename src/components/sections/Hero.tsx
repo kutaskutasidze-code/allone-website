@@ -5,7 +5,8 @@ import { Container } from '@/components/layout';
 import { useEffect, useRef } from 'react';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { ShimmerText } from '@/components/ui/ShimmerText';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight, MessageCircle } from 'lucide-react';
+import { useChat } from '@/components/chat';
 
 interface Node {
   x: number;
@@ -183,6 +184,8 @@ function ConnectedNodes() {
 }
 
 export function Hero() {
+  const { openChat } = useChat();
+
   return (
     <section className="min-h-[100svh] flex items-center justify-center relative overflow-hidden">
       {/* Connected nodes background */}
@@ -227,12 +230,12 @@ export function Hero() {
               View Our Work
             </GlassButton>
             <GlassButton
-              href="/contact"
+              onClick={openChat}
               variant="secondary"
               size="lg"
-              leftIcon={<Sparkles className="w-4 h-4" />}
+              leftIcon={<MessageCircle className="w-4 h-4" />}
             >
-              Get Started
+              Ask AI
             </GlassButton>
           </motion.div>
         </div>
