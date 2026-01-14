@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '@/components/layout';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GlassButton } from '@/components/ui/GlassButton';
@@ -211,18 +211,6 @@ function TypewriterText({ text, onComplete }: { text: string; onComplete?: () =>
   return <>{displayedText}</>;
 }
 
-// Smooth spring transition for layout animations
-const smoothTransition = {
-  type: 'spring' as const,
-  stiffness: 400,
-  damping: 30,
-};
-
-const fadeTransition = {
-  duration: 0.4,
-  ease: [0.4, 0, 0.2, 1] as [number, number, number, number],
-};
-
 export function Hero() {
   const [isChatActive, setIsChatActive] = useState(false);
   const [input, setInput] = useState('');
@@ -234,7 +222,7 @@ export function Hero() {
 
   const openChat = useCallback(() => {
     setIsChatActive(true);
-    setTimeout(() => inputRef.current?.focus(), 150);
+    setTimeout(() => inputRef.current?.focus(), 50);
   }, []);
 
   const closeChat = useCallback(() => {
@@ -330,205 +318,198 @@ export function Hero() {
 
       <Container>
         <div className="flex flex-col items-center text-center pt-28 pb-16 lg:pt-36 lg:pb-20 relative z-10 min-h-[400px] justify-center">
-          <LayoutGroup>
-            {/* Headline and description - fade out when chat active */}
-            <AnimatePresence mode="sync">
-              {!isChatActive && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={fadeTransition}
-                  className="flex flex-col items-center"
+          {/* Headline and description - fade out when chat active */}
+          <AnimatePresence>
+            {!isChatActive && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
+                className="flex flex-col items-center"
+              >
+                <div className="mb-6">
+                  <ShimmerText
+                    text="The Future Runs Itself"
+                    className="text-[clamp(2.5rem,6vw,4rem)] font-light leading-[1.1] tracking-[-0.02em]"
+                    delay={0.2}
+                  />
+                </div>
+
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.5 }}
+                  className="text-base lg:text-lg text-[var(--gray-500)] max-w-md leading-relaxed mb-10"
                 >
-                  <div className="mb-6">
-                    <ShimmerText
-                      text="The Future Runs Itself"
-                      className="text-[clamp(2.5rem,6vw,4rem)] font-light leading-[1.1] tracking-[-0.02em]"
-                      delay={0.2}
-                    />
-                  </div>
+                  We design and build intelligent automation systems that
+                  transform how businesses operate, scale, and compete.
+                </motion.p>
 
-                  <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.5 }}
-                    className="text-base lg:text-lg text-[var(--gray-500)] max-w-md leading-relaxed mb-10"
-                  >
-                    We design and build intelligent automation systems that
-                    transform how businesses operate, scale, and compete.
-                  </motion.p>
-
-                  {/* View Our Work button - fades out */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.7 }}
-                    className="mb-4"
-                  >
-                    <GlassButton
-                      href="/projects"
-                      variant="primary"
-                      size="lg"
-                      rightIcon={<ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
-                      className="group"
-                    >
-                      View Our Work
-                    </GlassButton>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Messages area - only shown when chat is active */}
-            <AnimatePresence mode="sync">
-              {isChatActive && messages.length > 0 && (
+                {/* View Our Work button */}
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={fadeTransition}
-                  className="w-full max-w-lg mb-8 relative"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.7 }}
+                  className="mb-4"
                 >
-                  {/* Fade gradient at top */}
-                  <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-white via-white/80 to-transparent z-10 pointer-events-none" />
-
-                  {/* Messages container with fixed height and scroll */}
-                  <div
-                    ref={messagesContainerRef}
-                    className="max-h-[180px] overflow-y-auto px-4 pt-12 pb-4"
-                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  <GlassButton
+                    href="/projects"
+                    variant="primary"
+                    size="lg"
+                    rightIcon={<ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
+                    className="group"
                   >
-                    <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
-                    {messages.map((message, index) => (
-                      <motion.div
-                        key={message.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index === messages.length - 1 ? 0.1 : 0 }}
-                        className="mb-4"
-                      >
-                        {message.role === 'user' ? (
-                          <p className="text-sm text-[var(--gray-600)] text-left">
-                            {message.content}
-                          </p>
-                        ) : (
-                          <p className="text-[15px] text-[var(--black)] leading-relaxed text-left">
-                            {streamingMessageId === message.id ? (
-                              <TypewriterText
-                                text={message.content}
-                                onComplete={() => setStreamingMessageId(null)}
-                              />
-                            ) : (
-                              message.content
-                            )}
-                          </p>
-                        )}
-                      </motion.div>
-                    ))}
-
-                    {/* Loading dots */}
-                    {isLoading && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex items-center gap-1.5 py-2"
-                      >
-                        <motion.span
-                          className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full"
-                          animate={{ opacity: [0.4, 1, 0.4] }}
-                          transition={{ duration: 1, repeat: Infinity, delay: 0 }}
-                        />
-                        <motion.span
-                          className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full"
-                          animate={{ opacity: [0.4, 1, 0.4] }}
-                          transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
-                        />
-                        <motion.span
-                          className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full"
-                          animate={{ opacity: [0.4, 1, 0.4] }}
-                          transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
-                        />
-                      </motion.div>
-                    )}
-                  </div>
+                    View Our Work
+                  </GlassButton>
                 </motion.div>
-              )}
-            </AnimatePresence>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-            {/* Ask AI button / Input - transforms between states */}
-            <motion.div layout transition={smoothTransition}>
-              <AnimatePresence mode="wait">
-                {!isChatActive ? (
-                  <motion.button
-                    key="button"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={openChat}
-                    className="px-8 py-3 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full hover:border-[var(--gray-400)] hover:shadow-sm transition-all whitespace-nowrap"
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Ask AI
-                  </motion.button>
-                ) : (
-                  <motion.div
-                    key="input"
-                    initial={{ opacity: 0, width: 100 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 100 }}
-                    transition={smoothTransition}
-                    className="relative flex items-center"
-                  >
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      disabled={isLoading}
-                      autoFocus
-                      className="w-[300px] sm:w-[380px] h-[44px] px-5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full outline-none text-left focus:border-[var(--gray-400)] focus:shadow-sm transition-all caret-[var(--gray-500)]"
-                    />
+          {/* Messages area - only shown when chat is active */}
+          <AnimatePresence>
+            {isChatActive && messages.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="w-full max-w-lg mb-6 relative"
+              >
+                {/* Fade gradient at top */}
+                <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
 
-                    {/* Close button */}
-                    <motion.button
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.2 }}
-                      onClick={closeChat}
-                      className="absolute -right-11 p-2 text-[var(--gray-400)] hover:text-[var(--gray-600)] transition-colors"
-                      aria-label="Close chat"
+                {/* Messages container */}
+                <div
+                  ref={messagesContainerRef}
+                  className="max-h-[200px] overflow-y-auto px-4 pt-10 pb-2"
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                  <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
+                  {messages.map((message, index) => (
+                    <motion.div
+                      key={message.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="mb-4"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                      </svg>
-                    </motion.button>
-
-                    {/* Send button */}
-                    <AnimatePresence>
-                      {input.trim() && (
-                        <motion.button
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.15 }}
-                          onClick={sendMessage}
-                          disabled={isLoading}
-                          className="absolute right-4 p-1 text-[var(--gray-400)] hover:text-[var(--black)] transition-colors"
-                        >
-                          <Send className="w-4 h-4" />
-                        </motion.button>
+                      {message.role === 'user' ? (
+                        <p className="text-sm text-[var(--gray-500)] text-left">
+                          {message.content}
+                        </p>
+                      ) : (
+                        <p className="text-[15px] text-[var(--black)] leading-relaxed text-left">
+                          {streamingMessageId === message.id ? (
+                            <TypewriterText
+                              text={message.content}
+                              onComplete={() => setStreamingMessageId(null)}
+                            />
+                          ) : (
+                            message.content
+                          )}
+                        </p>
                       )}
-                    </AnimatePresence>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          </LayoutGroup>
+                    </motion.div>
+                  ))}
+
+                  {/* Loading dots */}
+                  {isLoading && (
+                    <div className="flex items-center gap-1.5 py-2">
+                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse" />
+                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:150ms]" />
+                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:300ms]" />
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Ask AI button / Input - smooth in-place expansion */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
+            className="relative flex items-center justify-center"
+          >
+            {/* The container that expands */}
+            <div
+              className={`
+                relative flex items-center justify-center
+                bg-white border border-[var(--gray-300)] rounded-full
+                transition-all duration-300 ease-out
+                ${isChatActive
+                  ? 'w-[320px] sm:w-[400px]'
+                  : 'w-auto hover:border-[var(--gray-400)] hover:shadow-sm cursor-pointer'
+                }
+              `}
+              onClick={!isChatActive ? openChat : undefined}
+            >
+              {/* Button text - fades out */}
+              <span
+                className={`
+                  text-sm font-medium tracking-wide text-[var(--black)] select-none
+                  transition-all duration-200
+                  ${isChatActive
+                    ? 'opacity-0 absolute pointer-events-none'
+                    : 'opacity-100 px-8 py-3'
+                  }
+                `}
+              >
+                Ask AI
+              </span>
+
+              {/* Input - fades in */}
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={isLoading || !isChatActive}
+                className={`
+                  w-full h-[44px] px-5 text-sm font-medium tracking-wide
+                  bg-transparent text-[var(--black)] rounded-full
+                  outline-none text-left caret-[var(--gray-500)]
+                  transition-all duration-200
+                  ${isChatActive
+                    ? 'opacity-100'
+                    : 'opacity-0 absolute pointer-events-none'
+                  }
+                `}
+              />
+
+              {/* Send button inside */}
+              {isChatActive && input.trim() && (
+                <button
+                  onClick={sendMessage}
+                  disabled={isLoading}
+                  className="absolute right-4 p-1 text-[var(--gray-400)] hover:text-[var(--black)] transition-colors"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Close button - outside */}
+            {isChatActive && (
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.15 }}
+                onClick={closeChat}
+                className="absolute -right-10 p-2 text-[var(--gray-400)] hover:text-[var(--gray-600)] transition-colors"
+                aria-label="Close chat"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </motion.button>
+            )}
+          </motion.div>
         </div>
       </Container>
     </section>
