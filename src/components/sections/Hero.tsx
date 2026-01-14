@@ -197,7 +197,7 @@ export function Hero() {
 
   const openChat = useCallback(() => {
     setIsChatActive(true);
-    setTimeout(() => inputRef.current?.focus(), 300);
+    setTimeout(() => inputRef.current?.focus(), 400);
   }, []);
 
   const closeChat = useCallback(() => {
@@ -205,6 +205,18 @@ export function Hero() {
     setMessages([]);
     setInput('');
   }, []);
+
+  // Global ESC key listener
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isChatActive) {
+        closeChat();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [isChatActive, closeChat]);
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -273,16 +285,16 @@ export function Hero() {
       <ConnectedNodes />
 
       <Container>
-        <div className="flex flex-col items-center text-center pt-28 pb-16 lg:pt-36 lg:pb-20 relative z-10">
+        <div className="flex flex-col items-center text-center pt-28 pb-16 lg:pt-36 lg:pb-20 relative z-10 min-h-[400px] justify-center">
           <AnimatePresence mode="wait">
             {!isChatActive ? (
               /* Default Hero Content */
               <motion.div
                 key="hero-content"
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 1 }}
                 animate={{ opacity: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
                 className="flex flex-col items-center"
               >
                 {/* Main Headline with Shimmer */}
@@ -334,10 +346,10 @@ export function Hero() {
               /* Chat Mode */
               <motion.div
                 key="chat-content"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
                 className="w-full max-w-2xl flex flex-col items-center"
               >
                 {/* Messages */}
@@ -391,12 +403,12 @@ export function Hero() {
                   )}
                 </div>
 
-                {/* Input - minimal, no borders */}
+                {/* Input - with button border style */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="w-full max-w-md relative"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.15, duration: 0.3 }}
+                  className="relative"
                 >
                   <input
                     ref={inputRef}
@@ -406,12 +418,8 @@ export function Hero() {
                     onKeyDown={handleKeyDown}
                     placeholder="write here"
                     disabled={isLoading}
-                    className="w-full bg-transparent border-none outline-none text-center text-lg text-[var(--gray-800)] placeholder:text-[var(--gray-400)] focus:ring-0"
-                    style={{ caretColor: 'var(--gray-500)' }}
+                    className="w-auto min-w-[200px] px-8 py-3.5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full outline-none text-center placeholder:text-[var(--gray-400)] focus:border-[var(--gray-400)] transition-colors"
                   />
-
-                  {/* Subtle underline */}
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-px bg-[var(--gray-300)]" />
 
                   {/* Send button - appears when there's input */}
                   <AnimatePresence>
@@ -422,7 +430,7 @@ export function Hero() {
                         exit={{ opacity: 0, scale: 0.8 }}
                         onClick={sendMessage}
                         disabled={isLoading}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-[var(--gray-500)] hover:text-[var(--gray-800)] transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[var(--gray-500)] hover:text-[var(--gray-800)] transition-colors"
                       >
                         <Send className="w-4 h-4" />
                       </motion.button>
