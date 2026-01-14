@@ -18,12 +18,10 @@ interface Node {
 }
 
 const colors = [
-  '10, 10, 10',     // Near black
   '38, 38, 38',     // Charcoal
   '64, 64, 64',     // Dark gray
   '82, 82, 82',     // Medium gray
   '115, 115, 115',  // Gray
-  '140, 140, 140',  // Light gray
 ];
 
 function ConnectedNodes() {
@@ -36,14 +34,11 @@ function ConnectedNodes() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-
     let animationFrameId: number;
     let nodes: Node[] = [];
     let isPaused = false;
-    const connectionDistance = 180;
-    const nodeCount = 60;
+    const connectionDistance = 150;
+    const nodeCount = 40;
 
     const getCanvasDimensions = () => {
       const parent = canvas.parentElement;
@@ -66,8 +61,8 @@ function ConnectedNodes() {
       const { width, height } = getCanvasDimensions();
 
       const isMobile = width < 768;
-      const count = isMobile ? 30 : nodeCount;
-      const speed = isMobile ? 0.15 : 0.2;
+      const count = isMobile ? 20 : nodeCount;
+      const speed = isMobile ? 0.12 : 0.15;
       const padding = 20;
 
       for (let i = 0; i < count; i++) {
@@ -76,15 +71,11 @@ function ConnectedNodes() {
           y: padding + Math.random() * (height - padding * 2),
           vx: (Math.random() - 0.5) * speed,
           vy: (Math.random() - 0.5) * speed,
-          radius: isMobile ? 1.5 + Math.random() * 1.5 : 2 + Math.random() * 2.5,
+          radius: isMobile ? 1.5 + Math.random() * 1 : 2 + Math.random() * 1.5,
           pulseOffset: Math.random() * Math.PI * 2,
           color: colors[Math.floor(Math.random() * colors.length)],
         });
       }
-    };
-
-    const easeInOutQuad = (t: number) => {
-      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
     };
 
     const animate = (time: number) => {
@@ -94,87 +85,56 @@ function ConnectedNodes() {
       }
 
       const { width, height } = getCanvasDimensions();
-
       ctx.clearRect(0, 0, width, height);
 
       const padding = 20;
+      const maxVel = 0.25;
 
-      nodes.forEach((node) => {
+      // Update positions
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
         node.x += node.vx;
         node.y += node.vy;
 
-        // Bounce off edges with padding
-        if (node.x < padding) {
-          node.x = padding;
-          node.vx *= -1;
-        } else if (node.x > width - padding) {
-          node.x = width - padding;
-          node.vx *= -1;
-        }
-        if (node.y < padding) {
-          node.y = padding;
-          node.vy *= -1;
-        } else if (node.y > height - padding) {
-          node.y = height - padding;
-          node.vy *= -1;
-        }
+        if (node.x < padding) { node.x = padding; node.vx *= -1; }
+        else if (node.x > width - padding) { node.x = width - padding; node.vx *= -1; }
+        if (node.y < padding) { node.y = padding; node.vy *= -1; }
+        else if (node.y > height - padding) { node.y = height - padding; node.vy *= -1; }
 
-        const maxVel = 0.3;
         node.vx = Math.max(-maxVel, Math.min(maxVel, node.vx));
         node.vy = Math.max(-maxVel, Math.min(maxVel, node.vy));
-      });
+      }
 
-      // Draw connections
+      // Draw connections - simple lines, no gradients
+      ctx.lineWidth = 1;
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x;
           const dy = nodes[i].y - nodes[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+          const distSq = dx * dx + dy * dy;
 
-          if (distance < connectionDistance) {
-            const opacity = easeInOutQuad(1 - distance / connectionDistance) * 0.35;
-
-            const gradient = ctx.createLinearGradient(
-              nodes[i].x, nodes[i].y,
-              nodes[j].x, nodes[j].y
-            );
-            gradient.addColorStop(0, `rgba(${nodes[i].color}, ${opacity})`);
-            gradient.addColorStop(0.5, `rgba(${nodes[i].color}, ${opacity * 0.5})`);
-            gradient.addColorStop(1, `rgba(${nodes[j].color}, ${opacity})`);
-
+          if (distSq < connectionDistance * connectionDistance) {
+            const opacity = (1 - Math.sqrt(distSq) / connectionDistance) * 0.25;
+            ctx.strokeStyle = `rgba(100, 100, 100, ${opacity})`;
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
-            ctx.strokeStyle = gradient;
-            ctx.lineWidth = 1.5;
             ctx.stroke();
           }
         }
       }
 
-      // Draw nodes
-      nodes.forEach((node) => {
-        const pulse = Math.sin(time * 0.002 + node.pulseOffset) * 0.3 + 1;
+      // Draw nodes - simple circles, no gradients
+      const pulse = Math.sin(time * 0.001) * 0.2 + 1;
+      for (let i = 0; i < nodes.length; i++) {
+        const node = nodes[i];
         const radius = node.radius * pulse;
-
-        const glowGradient = ctx.createRadialGradient(
-          node.x, node.y, 0,
-          node.x, node.y, radius * 4
-        );
-        glowGradient.addColorStop(0, `rgba(${node.color}, 0.25)`);
-        glowGradient.addColorStop(0.5, `rgba(${node.color}, 0.08)`);
-        glowGradient.addColorStop(1, `rgba(${node.color}, 0)`);
-
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, radius * 4, 0, Math.PI * 2);
-        ctx.fillStyle = glowGradient;
-        ctx.fill();
 
         ctx.beginPath();
         ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${node.color}, 0.7)`;
+        ctx.fillStyle = `rgba(${node.color}, 0.6)`;
         ctx.fill();
-      });
+      }
 
       animationFrameId = requestAnimationFrame(animate);
     };

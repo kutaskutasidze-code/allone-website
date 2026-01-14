@@ -144,21 +144,11 @@ export function DashboardShowcase() {
           {/* Dashboard Column - slides from RIGHT */}
           <ScrollDashboardColumn>
             <div className="relative">
-              {/* Outer ambient glow - large and soft */}
+              {/* Simplified glow - no blur filter */}
               <div
-                className="absolute -inset-8 rounded-3xl opacity-30"
+                className="absolute -inset-4 rounded-2xl opacity-50"
                 style={{
-                  background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 40%, transparent 70%)',
-                  filter: 'blur(40px)',
-                }}
-              />
-
-              {/* Mid glow layer */}
-              <div
-                className="absolute -inset-4 rounded-2xl opacity-40"
-                style={{
-                  background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 50%, transparent 80%)',
-                  filter: 'blur(20px)',
+                  background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.12) 0%, transparent 60%)',
                 }}
               />
 
@@ -253,12 +243,11 @@ export function DashboardShowcase() {
               className="relative overflow-visible"
               style={{ height: '220px' }}
             >
-              {/* Ambient glow for mobile */}
+              {/* Ambient glow for mobile - no blur filter */}
               <div
                 className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] opacity-40"
                 style={{
-                  background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.15) 0%, transparent 70%)',
-                  filter: 'blur(30px)',
+                  background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.1) 0%, transparent 60%)',
                 }}
               />
 

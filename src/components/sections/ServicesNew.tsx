@@ -53,10 +53,10 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
             {/* Card 1: AI Chatbots - slides from LEFT */}
             <ServiceCard direction="left" borderStart="TOP">
               <div className="relative overflow-hidden h-full">
-                {/* Top-right corner glow */}
+                {/* Top-right corner glow - simplified */}
                 <div
-                  className="absolute top-0 right-0 w-[450px] h-[450px] pointer-events-none"
-                  style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 30%, transparent 55%)' }}
+                  className="absolute top-0 right-0 w-[350px] h-[350px] pointer-events-none"
+                  style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.12) 0%, transparent 50%)' }}
                 />
 
                 <div className="relative z-10 p-5 lg:p-6">
@@ -113,10 +113,10 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
             {/* Card 2: Custom AI Solutions - slides from TOP-RIGHT */}
             <ServiceCard direction="top-right" borderStart="RIGHT">
               <div className="relative overflow-hidden h-full">
-                {/* Bottom center glow */}
+                {/* Bottom center glow - simplified */}
                 <div
-                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[450px] h-[250px] pointer-events-none"
-                  style={{ background: 'radial-gradient(ellipse at bottom center, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 35%, transparent 60%)' }}
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[350px] h-[200px] pointer-events-none"
+                  style={{ background: 'radial-gradient(ellipse at bottom center, rgba(255,255,255,0.12) 0%, transparent 55%)' }}
                 />
 
                 <div className="relative z-10 p-6 lg:p-8 flex flex-col h-full">
@@ -164,10 +164,10 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
             {/* Card 3: Workflow Automation - slides from TOP-LEFT */}
             <ServiceCard direction="top-left" borderStart="BOTTOM">
               <div className="relative overflow-hidden h-full">
-                {/* Top-left corner glow */}
+                {/* Top-left corner glow - simplified */}
                 <div
-                  className="absolute top-0 left-0 w-[400px] h-[400px] pointer-events-none"
-                  style={{ background: 'radial-gradient(circle at top left, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 30%, transparent 55%)' }}
+                  className="absolute top-0 left-0 w-[300px] h-[300px] pointer-events-none"
+                  style={{ background: 'radial-gradient(circle at top left, rgba(255,255,255,0.12) 0%, transparent 50%)' }}
                 />
 
                 <div className="relative z-10 p-6 lg:p-8 h-full flex flex-col min-h-[420px]">
@@ -195,10 +195,10 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
             {/* Card 4: Website Development - slides from RIGHT */}
             <ServiceCard direction="right" borderStart="LEFT">
               <div className="relative overflow-hidden h-full">
-                {/* Top-right corner glow */}
+                {/* Top-right corner glow - simplified */}
                 <div
-                  className="absolute top-0 right-0 w-[450px] h-[450px] pointer-events-none"
-                  style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.08) 30%, transparent 55%)' }}
+                  className="absolute top-0 right-0 w-[350px] h-[350px] pointer-events-none"
+                  style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.12) 0%, transparent 50%)' }}
                 />
 
                 <div className="relative z-10 p-6 lg:p-8 h-full flex flex-col min-h-[420px]">
@@ -241,10 +241,10 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
           {/* Row 3: Strategy & Consulting - slides from BOTTOM */}
           <ServiceCard direction="bottom" borderStart="RIGHT">
             <div className="relative overflow-hidden h-full">
-              {/* Top center spotlight */}
+              {/* Top center spotlight - simplified */}
               <div
-                className="absolute top-0 left-1/2 -translate-x-1/2 w-[550px] h-[180px] pointer-events-none"
-                style={{ background: 'radial-gradient(ellipse at top center, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 40%, transparent 70%)' }}
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-[450px] h-[150px] pointer-events-none"
+                style={{ background: 'radial-gradient(ellipse at top center, rgba(255,255,255,0.15) 0%, transparent 60%)' }}
               />
 
               {/* Content */}
