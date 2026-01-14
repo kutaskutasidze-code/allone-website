@@ -397,7 +397,7 @@ export function Hero() {
                         className="mb-3"
                       >
                         {message.role === 'user' ? (
-                          <p className="text-sm text-[var(--gray-400)] italic text-left">
+                          <p className="text-sm text-[var(--black)] text-left">
                             {message.content}
                           </p>
                         ) : (
@@ -434,14 +434,14 @@ export function Hero() {
 
             {/* Ask AI button / Input - transforms between states */}
             <motion.div
-              layout
+              layout="position"
               className="relative"
             >
               {!isChatActive ? (
                 <motion.button
                   layoutId="chat-input"
                   onClick={openChat}
-                  className="px-8 py-3.5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full hover:border-[var(--gray-400)] transition-colors"
+                  className="px-8 py-3.5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full hover:border-[var(--gray-400)] transition-colors whitespace-nowrap"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -450,7 +450,7 @@ export function Hero() {
               ) : (
                 <motion.div
                   layoutId="chat-input"
-                  className="relative"
+                  className="relative flex items-center"
                 >
                   <input
                     ref={inputRef}
@@ -460,8 +460,22 @@ export function Hero() {
                     onKeyDown={handleKeyDown}
                     disabled={isLoading}
                     autoFocus
-                    className="min-w-[200px] px-8 py-3.5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full outline-none text-left focus:border-[var(--gray-400)] transition-colors caret-[var(--gray-500)]"
+                    className="w-[280px] sm:w-[350px] px-8 py-3.5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full outline-none text-left focus:border-[var(--gray-400)] transition-all caret-[var(--gray-500)]"
                   />
+
+                  {/* Close button for mobile */}
+                  <motion.button
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    onClick={closeChat}
+                    className="absolute -right-10 sm:-right-12 p-2 text-[var(--gray-400)] hover:text-[var(--gray-600)] transition-colors"
+                    aria-label="Close chat"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </motion.button>
 
                   <AnimatePresence>
                     {input.trim() && (
