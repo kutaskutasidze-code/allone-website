@@ -211,6 +211,18 @@ function TypewriterText({ text, onComplete }: { text: string; onComplete?: () =>
   return <>{displayedText}</>;
 }
 
+// Smooth spring transition for layout animations
+const smoothTransition = {
+  type: 'spring' as const,
+  stiffness: 400,
+  damping: 30,
+};
+
+const fadeTransition = {
+  duration: 0.4,
+  ease: [0.4, 0, 0.2, 1] as [number, number, number, number],
+};
+
 export function Hero() {
   const [isChatActive, setIsChatActive] = useState(false);
   const [input, setInput] = useState('');
@@ -222,7 +234,7 @@ export function Hero() {
 
   const openChat = useCallback(() => {
     setIsChatActive(true);
-    setTimeout(() => inputRef.current?.focus(), 100);
+    setTimeout(() => inputRef.current?.focus(), 150);
   }, []);
 
   const closeChat = useCallback(() => {
@@ -320,13 +332,13 @@ export function Hero() {
         <div className="flex flex-col items-center text-center pt-28 pb-16 lg:pt-36 lg:pb-20 relative z-10 min-h-[400px] justify-center">
           <LayoutGroup>
             {/* Headline and description - fade out when chat active */}
-            <AnimatePresence>
+            <AnimatePresence mode="sync">
               {!isChatActive && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
+                  transition={fadeTransition}
                   className="flex flex-col items-center"
                 >
                   <div className="mb-6">
@@ -369,39 +381,39 @@ export function Hero() {
             </AnimatePresence>
 
             {/* Messages area - only shown when chat is active */}
-            <AnimatePresence>
+            <AnimatePresence mode="sync">
               {isChatActive && messages.length > 0 && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full max-w-xl mb-6 relative"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={fadeTransition}
+                  className="w-full max-w-lg mb-8 relative"
                 >
                   {/* Fade gradient at top */}
-                  <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+                  <div className="absolute top-0 left-0 right-0 h-12 bg-gradient-to-b from-white via-white/80 to-transparent z-10 pointer-events-none" />
 
                   {/* Messages container with fixed height and scroll */}
                   <div
                     ref={messagesContainerRef}
-                    className="max-h-[200px] overflow-y-auto px-4 pt-8 pb-2 scroll-smooth"
+                    className="max-h-[180px] overflow-y-auto px-4 pt-12 pb-4"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                   >
                     <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
-                    {messages.map((message) => (
+                    {messages.map((message, index) => (
                       <motion.div
                         key={message.id}
-                        initial={{ opacity: 0, x: message.role === 'assistant' ? 50 : 0 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.4 }}
-                        className="mb-3"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index === messages.length - 1 ? 0.1 : 0 }}
+                        className="mb-4"
                       >
                         {message.role === 'user' ? (
-                          <p className="text-sm text-[var(--black)] text-left">
+                          <p className="text-sm text-[var(--gray-600)] text-left">
                             {message.content}
                           </p>
                         ) : (
-                          <p className="text-base text-[var(--gray-700)] leading-relaxed text-left">
+                          <p className="text-[15px] text-[var(--black)] leading-relaxed text-left">
                             {streamingMessageId === message.id ? (
                               <TypewriterText
                                 text={message.content}
@@ -420,11 +432,23 @@ export function Hero() {
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex items-center gap-1 py-2"
+                        className="flex items-center gap-1.5 py-2"
                       >
-                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                        <motion.span
+                          className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full"
+                          animate={{ opacity: [0.4, 1, 0.4] }}
+                          transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+                        />
+                        <motion.span
+                          className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full"
+                          animate={{ opacity: [0.4, 1, 0.4] }}
+                          transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+                        />
+                        <motion.span
+                          className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full"
+                          animate={{ opacity: [0.4, 1, 0.4] }}
+                          transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+                        />
                       </motion.div>
                     )}
                   </div>
@@ -433,82 +457,77 @@ export function Hero() {
             </AnimatePresence>
 
             {/* Ask AI button / Input - transforms between states */}
-            <motion.div
-              layout="position"
-              className="relative"
-            >
-              {!isChatActive ? (
-                <motion.button
-                  layoutId="chat-input"
-                  onClick={openChat}
-                  className="px-8 py-3.5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full hover:border-[var(--gray-400)] transition-colors whitespace-nowrap"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Ask AI
-                </motion.button>
-              ) : (
-                <motion.div
-                  layoutId="chat-input"
-                  className="relative flex items-center"
-                >
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    disabled={isLoading}
-                    autoFocus
-                    className="w-[280px] sm:w-[350px] px-8 py-3.5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full outline-none text-left focus:border-[var(--gray-400)] transition-all caret-[var(--gray-500)]"
-                  />
-
-                  {/* Close button for mobile */}
+            <motion.div layout transition={smoothTransition}>
+              <AnimatePresence mode="wait">
+                {!isChatActive ? (
                   <motion.button
+                    key="button"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    onClick={closeChat}
-                    className="absolute -right-10 sm:-right-12 p-2 text-[var(--gray-400)] hover:text-[var(--gray-600)] transition-colors"
-                    aria-label="Close chat"
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={openChat}
+                    className="px-8 py-3 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full hover:border-[var(--gray-400)] hover:shadow-sm transition-all whitespace-nowrap"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
+                    Ask AI
                   </motion.button>
+                ) : (
+                  <motion.div
+                    key="input"
+                    initial={{ opacity: 0, width: 100 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 100 }}
+                    transition={smoothTransition}
+                    className="relative flex items-center"
+                  >
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      disabled={isLoading}
+                      autoFocus
+                      className="w-[300px] sm:w-[380px] h-[44px] px-5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full outline-none text-left focus:border-[var(--gray-400)] focus:shadow-sm transition-all caret-[var(--gray-500)]"
+                    />
 
-                  <AnimatePresence>
-                    {input.trim() && (
-                      <motion.button
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        onClick={sendMessage}
-                        disabled={isLoading}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[var(--gray-500)] hover:text-[var(--gray-800)] transition-colors"
-                      >
-                        <Send className="w-4 h-4" />
-                      </motion.button>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              )}
+                    {/* Close button */}
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.2 }}
+                      onClick={closeChat}
+                      className="absolute -right-11 p-2 text-[var(--gray-400)] hover:text-[var(--gray-600)] transition-colors"
+                      aria-label="Close chat"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </motion.button>
+
+                    {/* Send button */}
+                    <AnimatePresence>
+                      {input.trim() && (
+                        <motion.button
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ duration: 0.15 }}
+                          onClick={sendMessage}
+                          disabled={isLoading}
+                          className="absolute right-4 p-1 text-[var(--gray-400)] hover:text-[var(--black)] transition-colors"
+                        >
+                          <Send className="w-4 h-4" />
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
-
-            {/* ESC hint - only when chat is active */}
-            <AnimatePresence>
-              {isChatActive && (
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-xs text-[var(--gray-400)] mt-6"
-                >
-                  press <kbd className="px-1.5 py-0.5 bg-[var(--gray-100)] rounded text-[var(--gray-500)]">esc</kbd> to close
-                </motion.p>
-              )}
-            </AnimatePresence>
           </LayoutGroup>
         </div>
       </Container>
