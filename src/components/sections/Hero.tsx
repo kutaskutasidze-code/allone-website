@@ -327,13 +327,13 @@ export function Hero() {
         <div className="min-h-[100svh] flex flex-col items-center justify-center relative z-10 py-20">
 
           {/* Upper content area - fixed height so button stays in place */}
-          <div className="h-[280px] flex flex-col items-center justify-end mb-8">
+          <div className="h-[280px] flex flex-col items-center justify-end mb-8 relative">
             {/* Hero content - fades out */}
             <div
               className={`
                 flex flex-col items-center text-center
                 transition-all duration-500 ease-out
-                ${isChatActive ? 'opacity-0 pointer-events-none translate-y-4' : 'opacity-100 translate-y-0'}
+                ${isChatActive ? 'opacity-0 pointer-events-none' : 'opacity-100'}
               `}
             >
               <div className="mb-6">
@@ -371,48 +371,59 @@ export function Hero() {
               </motion.div>
             </div>
 
-            {/* Messages area - fades in, positioned in the same space */}
+            {/* Chat messages area - classic chatbot layout */}
             <div
               className={`
-                absolute w-full max-w-lg px-4
+                absolute inset-0 flex flex-col justify-end
+                w-full max-w-lg mx-auto px-4
                 transition-all duration-500 ease-out
-                ${isChatActive && messages.length > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+                ${isChatActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}
               `}
-              style={{ bottom: '70px' }}
             >
-              <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+              {/* Messages container - scrollable, content aligned to bottom */}
               <div
                 ref={messagesContainerRef}
-                className="max-h-[200px] overflow-y-auto pt-8 pb-2"
+                className="flex-1 overflow-y-auto flex flex-col justify-end"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
-                {messages.map((message) => (
-                  <div key={message.id} className="mb-4 animate-fade-in">
-                    {message.role === 'user' ? (
-                      <p className="text-sm text-[var(--gray-500)] text-left">{message.content}</p>
-                    ) : (
-                      <p className="text-[15px] text-[var(--black)] leading-relaxed text-left">
-                        {streamingMessageId === message.id ? (
-                          <TypewriterText
-                            text={message.content}
-                            onComplete={() => setStreamingMessageId(null)}
-                            onType={scrollToBottom}
-                          />
-                        ) : (
-                          message.content
-                        )}
-                      </p>
-                    )}
-                  </div>
-                ))}
-                {isLoading && (
-                  <div className="flex items-center gap-1.5 py-2">
-                    <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse" />
-                    <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:150ms]" />
-                    <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:300ms]" />
-                  </div>
+
+                {/* Fade gradient at top */}
+                {messages.length > 0 && (
+                  <div className="sticky top-0 h-6 bg-gradient-to-b from-white to-transparent pointer-events-none" />
                 )}
+
+                {/* Messages */}
+                <div className="space-y-4 pb-4">
+                  {messages.map((message) => (
+                    <div key={message.id} className="animate-fade-in">
+                      {message.role === 'user' ? (
+                        <p className="text-sm text-[var(--gray-500)] text-left">{message.content}</p>
+                      ) : (
+                        <p className="text-[15px] text-[var(--black)] leading-relaxed text-left">
+                          {streamingMessageId === message.id ? (
+                            <TypewriterText
+                              text={message.content}
+                              onComplete={() => setStreamingMessageId(null)}
+                              onType={scrollToBottom}
+                            />
+                          ) : (
+                            message.content
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Loading indicator */}
+                  {isLoading && (
+                    <div className="flex items-center gap-1.5 py-2">
+                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse" />
+                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:150ms]" />
+                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:300ms]" />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
