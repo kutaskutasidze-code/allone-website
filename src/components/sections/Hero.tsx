@@ -184,7 +184,7 @@ function ConnectedNodes() {
 }
 
 // Typewriter component for streaming effect
-function TypewriterText({ text, onComplete }: { text: string; onComplete?: () => void }) {
+function TypewriterText({ text, onComplete, onType }: { text: string; onComplete?: () => void; onType?: () => void }) {
   const [displayedText, setDisplayedText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
 
@@ -198,6 +198,7 @@ function TypewriterText({ text, onComplete }: { text: string; onComplete?: () =>
       if (index < text.length) {
         setDisplayedText(text.slice(0, index + 1));
         index++;
+        onType?.(); // Trigger scroll on each character
       } else {
         clearInterval(timer);
         setIsComplete(true);
@@ -206,7 +207,7 @@ function TypewriterText({ text, onComplete }: { text: string; onComplete?: () =>
     }, speed);
 
     return () => clearInterval(timer);
-  }, [text, isComplete, onComplete]);
+  }, [text, isComplete, onComplete, onType]);
 
   return <>{displayedText}</>;
 }
@@ -244,12 +245,17 @@ export function Hero() {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isChatActive, closeChat]);
 
-  // Auto-scroll to bottom when new messages arrive
-  useEffect(() => {
+  // Scroll to bottom function
+  const scrollToBottom = useCallback(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, []);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -388,7 +394,11 @@ export function Hero() {
                     ) : (
                       <p className="text-[15px] text-[var(--black)] leading-relaxed text-left">
                         {streamingMessageId === message.id ? (
-                          <TypewriterText text={message.content} onComplete={() => setStreamingMessageId(null)} />
+                          <TypewriterText
+                            text={message.content}
+                            onComplete={() => setStreamingMessageId(null)}
+                            onType={scrollToBottom}
+                          />
                         ) : (
                           message.content
                         )}
@@ -412,91 +422,92 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9 }}
-            className="relative"
+            className="relative flex justify-center"
           >
-            <div className="relative flex items-center">
-              {/* Gradient border wrapper */}
+            {/* Gradient border wrapper - centered */}
+            <div
+              className={`
+                relative rounded-full p-[1px]
+                bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200
+                transition-all duration-500 ease-out
+                ${isChatActive ? 'w-[320px] sm:w-[380px]' : 'w-[130px]'}
+              `}
+            >
+              {/* Inner white container */}
               <div
+                onClick={!isChatActive ? openChat : undefined}
                 className={`
-                  relative rounded-full p-[1px]
-                  bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200
-                  transition-all duration-500 ease-out
-                  ${isChatActive ? 'w-[320px] sm:w-[380px]' : 'w-[130px]'}
+                  relative h-[46px] rounded-full bg-white
+                  flex items-center justify-center
+                  ${!isChatActive ? 'cursor-pointer hover:bg-gray-50' : ''}
+                  transition-colors duration-200
                 `}
               >
-                {/* Inner white container */}
-                <div
-                  onClick={!isChatActive ? openChat : undefined}
+                {/* "Ask AI" text */}
+                <span
                   className={`
-                    relative h-[46px] rounded-full bg-white
-                    flex items-center justify-center
-                    ${!isChatActive ? 'cursor-pointer hover:bg-gray-50' : ''}
-                    transition-colors duration-200
+                    text-sm font-medium tracking-wide text-[var(--black)]
+                    transition-all duration-300
+                    ${isChatActive ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}
                   `}
                 >
-                  {/* "Ask AI" text */}
-                  <span
-                    className={`
-                      text-sm font-medium tracking-wide text-[var(--black)]
-                      transition-all duration-300
-                      ${isChatActive ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}
-                    `}
-                  >
-                    Ask AI
-                  </span>
+                  Ask AI
+                </span>
 
-                  {/* Input */}
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    disabled={isLoading || !isChatActive}
-                    className={`
-                      absolute inset-0 w-full h-full px-5 pr-12
-                      text-sm font-medium tracking-wide
-                      bg-transparent text-[var(--black)] rounded-full
-                      outline-none text-left caret-[var(--gray-500)]
-                      transition-all duration-300
-                      ${isChatActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-                    `}
-                  />
+                {/* Input */}
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={isLoading || !isChatActive}
+                  placeholder={isChatActive ? "Ask me anything..." : ""}
+                  className={`
+                    absolute inset-0 w-full h-full px-5 pr-12
+                    text-sm font-medium tracking-wide
+                    bg-transparent text-[var(--black)] rounded-full
+                    outline-none text-left caret-[var(--gray-500)]
+                    placeholder:text-gray-400 placeholder:font-normal
+                    transition-all duration-300
+                    ${isChatActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+                  `}
+                />
 
-                  {/* Send button */}
-                  <button
-                    onClick={(e) => { e.stopPropagation(); sendMessage(); }}
-                    disabled={isLoading || !input.trim()}
-                    className={`
-                      absolute right-4 top-1/2 -translate-y-1/2
-                      transition-all duration-200
-                      ${isChatActive && input.trim()
-                        ? 'opacity-100 text-[var(--gray-500)] hover:text-[var(--black)]'
-                        : 'opacity-0 pointer-events-none'}
-                    `}
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
-                </div>
+                {/* Send button */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); sendMessage(); }}
+                  disabled={isLoading || !input.trim()}
+                  className={`
+                    absolute right-4 top-1/2 -translate-y-1/2
+                    transition-all duration-200
+                    ${isChatActive && input.trim()
+                      ? 'opacity-100 text-[var(--gray-500)] hover:text-[var(--black)]'
+                      : 'opacity-0 pointer-events-none'}
+                  `}
+                >
+                  <Send className="w-4 h-4" />
+                </button>
               </div>
-
-              {/* Close button */}
-              <button
-                onClick={closeChat}
-                className={`
-                  ml-3 p-2 rounded-full
-                  text-[var(--gray-400)] hover:text-[var(--gray-600)] hover:bg-gray-100
-                  transition-all duration-300
-                  ${isChatActive ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}
-                `}
-                aria-label="Close chat"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
             </div>
+
+            {/* Close button - positioned absolutely to not affect centering */}
+            <button
+              onClick={closeChat}
+              className={`
+                absolute left-full ml-3 top-1/2 -translate-y-1/2
+                p-2 rounded-full
+                text-[var(--gray-400)] hover:text-[var(--gray-600)] hover:bg-gray-100
+                transition-all duration-300
+                ${isChatActive ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}
+              `}
+              aria-label="Close chat"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
           </motion.div>
         </div>
       </Container>
