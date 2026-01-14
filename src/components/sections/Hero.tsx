@@ -1,12 +1,11 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Container } from '@/components/layout';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { ShimmerText } from '@/components/ui/ShimmerText';
-import { ArrowRight, MessageCircle } from 'lucide-react';
-import { useChat } from '@/components/chat';
+import { ArrowRight, Send } from 'lucide-react';
 
 interface Node {
   x: number;
@@ -16,6 +15,12 @@ interface Node {
   radius: number;
   pulseOffset: number;
   color: string;
+}
+
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 const colors = [
@@ -184,7 +189,83 @@ function ConnectedNodes() {
 }
 
 export function Hero() {
-  const { openChat } = useChat();
+  const [isChatActive, setIsChatActive] = useState(false);
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const openChat = useCallback(() => {
+    setIsChatActive(true);
+    setTimeout(() => inputRef.current?.focus(), 300);
+  }, []);
+
+  const closeChat = useCallback(() => {
+    setIsChatActive(false);
+    setMessages([]);
+    setInput('');
+  }, []);
+
+  const sendMessage = async () => {
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: input.trim(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, userMessage].map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.reply,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Chat error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: "Sorry, I couldn't connect. Please try again.",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+    if (e.key === 'Escape') {
+      closeChat();
+    }
+  };
 
   return (
     <section className="min-h-[100svh] flex items-center justify-center relative overflow-hidden">
@@ -193,51 +274,174 @@ export function Hero() {
 
       <Container>
         <div className="flex flex-col items-center text-center pt-28 pb-16 lg:pt-36 lg:pb-20 relative z-10">
-          {/* Main Headline with Shimmer */}
-          <div className="mb-6">
-            <ShimmerText
-              text="The Future Runs Itself"
-              className="text-[clamp(2.5rem,6vw,4rem)] font-light leading-[1.1] tracking-[-0.02em]"
-              delay={0.2}
-            />
-          </div>
+          <AnimatePresence mode="wait">
+            {!isChatActive ? (
+              /* Default Hero Content */
+              <motion.div
+                key="hero-content"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center"
+              >
+                {/* Main Headline with Shimmer */}
+                <div className="mb-6">
+                  <ShimmerText
+                    text="The Future Runs Itself"
+                    className="text-[clamp(2.5rem,6vw,4rem)] font-light leading-[1.1] tracking-[-0.02em]"
+                    delay={0.2}
+                  />
+                </div>
 
-          {/* Description */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-base lg:text-lg text-[var(--gray-500)] max-w-md leading-relaxed"
-          >
-            We design and build intelligent automation systems that
-            transform how businesses operate, scale, and compete.
-          </motion.p>
+                {/* Description */}
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.5 }}
+                  className="text-base lg:text-lg text-[var(--gray-500)] max-w-md leading-relaxed"
+                >
+                  We design and build intelligent automation systems that
+                  transform how businesses operate, scale, and compete.
+                </motion.p>
 
-          {/* Glass CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.7 }}
-            className="flex flex-col sm:flex-row gap-4 mt-10"
-          >
-            <GlassButton
-              href="/projects"
-              variant="primary"
-              size="lg"
-              rightIcon={<ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
-              className="group"
-            >
-              View Our Work
-            </GlassButton>
-            <GlassButton
-              onClick={openChat}
-              variant="secondary"
-              size="lg"
-              leftIcon={<MessageCircle className="w-4 h-4" />}
-            >
-              Ask AI
-            </GlassButton>
-          </motion.div>
+                {/* CTA Buttons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.7 }}
+                  className="flex flex-col sm:flex-row gap-4 mt-10"
+                >
+                  <GlassButton
+                    href="/projects"
+                    variant="primary"
+                    size="lg"
+                    rightIcon={<ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
+                    className="group"
+                  >
+                    View Our Work
+                  </GlassButton>
+                  <GlassButton
+                    onClick={openChat}
+                    variant="secondary"
+                    size="lg"
+                  >
+                    Ask AI
+                  </GlassButton>
+                </motion.div>
+              </motion.div>
+            ) : (
+              /* Chat Mode */
+              <motion.div
+                key="chat-content"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="w-full max-w-2xl flex flex-col items-center"
+              >
+                {/* Messages */}
+                <div className="w-full min-h-[120px] mb-8 flex flex-col items-center justify-center">
+                  <AnimatePresence mode="popLayout">
+                    {messages.map((message, index) => (
+                      <motion.div
+                        key={message.id}
+                        initial={{
+                          opacity: 0,
+                          x: message.role === 'assistant' ? 100 : 0,
+                          y: message.role === 'user' ? -20 : 0
+                        }}
+                        animate={{ opacity: 1, x: 0, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{
+                          duration: 0.5,
+                          ease: 'easeOut',
+                          delay: message.role === 'assistant' ? 0.1 : 0
+                        }}
+                        className={`w-full mb-4 ${
+                          message.role === 'user'
+                            ? 'text-center'
+                            : 'text-center'
+                        }`}
+                      >
+                        {message.role === 'user' ? (
+                          <span className="text-sm text-[var(--gray-400)] italic">
+                            {message.content}
+                          </span>
+                        ) : (
+                          <p className="text-base lg:text-lg text-[var(--gray-700)] leading-relaxed max-w-xl mx-auto">
+                            {message.content}
+                          </p>
+                        )}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+
+                  {/* Loading indicator */}
+                  {isLoading && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex items-center gap-1"
+                    >
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Input - minimal, no borders */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="w-full max-w-md relative"
+                >
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="write here"
+                    disabled={isLoading}
+                    className="w-full bg-transparent border-none outline-none text-center text-lg text-[var(--gray-800)] placeholder:text-[var(--gray-400)] focus:ring-0"
+                    style={{ caretColor: 'var(--gray-500)' }}
+                  />
+
+                  {/* Subtle underline */}
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-px bg-[var(--gray-300)]" />
+
+                  {/* Send button - appears when there's input */}
+                  <AnimatePresence>
+                    {input.trim() && (
+                      <motion.button
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        onClick={sendMessage}
+                        disabled={isLoading}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-[var(--gray-500)] hover:text-[var(--gray-800)] transition-colors"
+                      >
+                        <Send className="w-4 h-4" />
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+
+                {/* Close hint */}
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="text-xs text-[var(--gray-400)] mt-8"
+                >
+                  press <kbd className="px-1.5 py-0.5 bg-[var(--gray-100)] rounded text-[var(--gray-500)]">esc</kbd> to close
+                </motion.p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </Container>
     </section>
