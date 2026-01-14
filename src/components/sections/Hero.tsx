@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Container } from '@/components/layout';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GlassButton } from '@/components/ui/GlassButton';
@@ -21,13 +21,14 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  displayedContent?: string;
 }
 
 const colors = [
-  '38, 38, 38',     // Charcoal
-  '64, 64, 64',     // Dark gray
-  '82, 82, 82',     // Medium gray
-  '115, 115, 115',  // Gray
+  '38, 38, 38',
+  '64, 64, 64',
+  '82, 82, 82',
+  '115, 115, 115',
 ];
 
 function ConnectedNodes() {
@@ -65,7 +66,6 @@ function ConnectedNodes() {
     const initNodes = () => {
       nodes = [];
       const { width, height } = getCanvasDimensions();
-
       const isMobile = width < 768;
       const count = isMobile ? 20 : nodeCount;
       const speed = isMobile ? 0.12 : 0.15;
@@ -96,7 +96,6 @@ function ConnectedNodes() {
       const padding = 20;
       const maxVel = 0.25;
 
-      // Update positions
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
         node.x += node.vx;
@@ -111,7 +110,6 @@ function ConnectedNodes() {
         node.vy = Math.max(-maxVel, Math.min(maxVel, node.vy));
       }
 
-      // Draw connections - simple lines, no gradients
       ctx.lineWidth = 1;
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
@@ -130,12 +128,10 @@ function ConnectedNodes() {
         }
       }
 
-      // Draw nodes - simple circles, no gradients
       const pulse = Math.sin(time * 0.001) * 0.2 + 1;
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
         const radius = node.radius * pulse;
-
         ctx.beginPath();
         ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${node.color}, 0.6)`;
@@ -166,7 +162,6 @@ function ConnectedNodes() {
     window.addEventListener('resize', handleResize);
     animationFrameId = requestAnimationFrame(animate);
 
-    // Pause animation when tab is not visible to save resources
     const handleVisibilityChange = () => {
       isPaused = document.hidden;
     };
@@ -188,22 +183,53 @@ function ConnectedNodes() {
   );
 }
 
+// Typewriter component for streaming effect
+function TypewriterText({ text, onComplete }: { text: string; onComplete?: () => void }) {
+  const [displayedText, setDisplayedText] = useState('');
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    if (isComplete) return;
+
+    let index = 0;
+    const speed = 20; // ms per character
+
+    const timer = setInterval(() => {
+      if (index < text.length) {
+        setDisplayedText(text.slice(0, index + 1));
+        index++;
+      } else {
+        clearInterval(timer);
+        setIsComplete(true);
+        onComplete?.();
+      }
+    }, speed);
+
+    return () => clearInterval(timer);
+  }, [text, isComplete, onComplete]);
+
+  return <>{displayedText}</>;
+}
+
 export function Hero() {
   const [isChatActive, setIsChatActive] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const openChat = useCallback(() => {
     setIsChatActive(true);
-    setTimeout(() => inputRef.current?.focus(), 400);
+    setTimeout(() => inputRef.current?.focus(), 100);
   }, []);
 
   const closeChat = useCallback(() => {
     setIsChatActive(false);
     setMessages([]);
     setInput('');
+    setStreamingMessageId(null);
   }, []);
 
   // Global ESC key listener
@@ -217,6 +243,13 @@ export function Hero() {
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isChatActive, closeChat]);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -249,13 +282,15 @@ export function Hero() {
         throw new Error(data.error);
       }
 
+      const assistantMessageId = (Date.now() + 1).toString();
       const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: assistantMessageId,
         role: 'assistant',
         content: data.reply,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
+      setStreamingMessageId(assistantMessageId);
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessage: Message = {
@@ -264,6 +299,7 @@ export function Hero() {
         content: "Sorry, I couldn't connect. Please try again.",
       };
       setMessages((prev) => [...prev, errorMessage]);
+      setStreamingMessageId(errorMessage.id);
     } finally {
       setIsLoading(false);
     }
@@ -274,140 +310,146 @@ export function Hero() {
       e.preventDefault();
       sendMessage();
     }
-    if (e.key === 'Escape') {
-      closeChat();
-    }
   };
 
   return (
     <section className="min-h-[100svh] flex items-center justify-center relative overflow-hidden">
-      {/* Connected nodes background */}
       <ConnectedNodes />
 
       <Container>
         <div className="flex flex-col items-center text-center pt-28 pb-16 lg:pt-36 lg:pb-20 relative z-10 min-h-[400px] justify-center">
-          <AnimatePresence mode="wait">
-            {!isChatActive ? (
-              /* Default Hero Content */
-              <motion.div
-                key="hero-content"
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4, ease: 'easeInOut' }}
-                className="flex flex-col items-center"
-              >
-                {/* Main Headline with Shimmer */}
-                <div className="mb-6">
-                  <ShimmerText
-                    text="The Future Runs Itself"
-                    className="text-[clamp(2.5rem,6vw,4rem)] font-light leading-[1.1] tracking-[-0.02em]"
-                    delay={0.2}
-                  />
-                </div>
-
-                {/* Description */}
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.5 }}
-                  className="text-base lg:text-lg text-[var(--gray-500)] max-w-md leading-relaxed"
-                >
-                  We design and build intelligent automation systems that
-                  transform how businesses operate, scale, and compete.
-                </motion.p>
-
-                {/* CTA Buttons */}
+          <LayoutGroup>
+            {/* Headline and description - fade out when chat active */}
+            <AnimatePresence>
+              {!isChatActive && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.7 }}
-                  className="flex flex-col sm:flex-row gap-4 mt-10"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col items-center"
                 >
-                  <GlassButton
-                    href="/projects"
-                    variant="primary"
-                    size="lg"
-                    rightIcon={<ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
-                    className="group"
+                  <div className="mb-6">
+                    <ShimmerText
+                      text="The Future Runs Itself"
+                      className="text-[clamp(2.5rem,6vw,4rem)] font-light leading-[1.1] tracking-[-0.02em]"
+                      delay={0.2}
+                    />
+                  </div>
+
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.5 }}
+                    className="text-base lg:text-lg text-[var(--gray-500)] max-w-md leading-relaxed mb-10"
                   >
-                    View Our Work
-                  </GlassButton>
-                  <GlassButton
-                    onClick={openChat}
-                    variant="secondary"
-                    size="lg"
+                    We design and build intelligent automation systems that
+                    transform how businesses operate, scale, and compete.
+                  </motion.p>
+
+                  {/* View Our Work button - fades out */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.7 }}
+                    className="mb-4"
                   >
-                    Ask AI
-                  </GlassButton>
+                    <GlassButton
+                      href="/projects"
+                      variant="primary"
+                      size="lg"
+                      rightIcon={<ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
+                      className="group"
+                    >
+                      View Our Work
+                    </GlassButton>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            ) : (
-              /* Chat Mode */
-              <motion.div
-                key="chat-content"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4, ease: 'easeInOut' }}
-                className="w-full max-w-2xl flex flex-col items-center"
-              >
-                {/* Messages */}
-                <div className="w-full min-h-[120px] mb-8 flex flex-col items-center justify-center">
-                  <AnimatePresence mode="popLayout">
-                    {messages.map((message, index) => (
+              )}
+            </AnimatePresence>
+
+            {/* Messages area - only shown when chat is active */}
+            <AnimatePresence>
+              {isChatActive && messages.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full max-w-xl mb-6 relative"
+                >
+                  {/* Fade gradient at top */}
+                  <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+
+                  {/* Messages container with fixed height and scroll */}
+                  <div
+                    ref={messagesContainerRef}
+                    className="max-h-[200px] overflow-y-auto px-4 pt-8 pb-2 scroll-smooth"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                  >
+                    <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
+                    {messages.map((message) => (
                       <motion.div
                         key={message.id}
-                        initial={{
-                          opacity: 0,
-                          x: message.role === 'assistant' ? 100 : 0,
-                          y: message.role === 'user' ? -20 : 0
-                        }}
-                        animate={{ opacity: 1, x: 0, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{
-                          duration: 0.5,
-                          ease: 'easeOut',
-                          delay: message.role === 'assistant' ? 0.1 : 0
-                        }}
-                        className={`w-full mb-4 ${
-                          message.role === 'user'
-                            ? 'text-center'
-                            : 'text-center'
-                        }`}
+                        initial={{ opacity: 0, x: message.role === 'assistant' ? 50 : 0 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="mb-3"
                       >
                         {message.role === 'user' ? (
-                          <span className="text-sm text-[var(--gray-400)] italic">
+                          <p className="text-sm text-[var(--gray-400)] italic text-left">
                             {message.content}
-                          </span>
+                          </p>
                         ) : (
-                          <p className="text-base lg:text-lg text-[var(--gray-700)] leading-relaxed max-w-xl mx-auto">
-                            {message.content}
+                          <p className="text-base text-[var(--gray-700)] leading-relaxed text-left">
+                            {streamingMessageId === message.id ? (
+                              <TypewriterText
+                                text={message.content}
+                                onComplete={() => setStreamingMessageId(null)}
+                              />
+                            ) : (
+                              message.content
+                            )}
                           </p>
                         )}
                       </motion.div>
                     ))}
-                  </AnimatePresence>
 
-                  {/* Loading indicator */}
-                  {isLoading && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex items-center gap-1"
-                    >
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                    </motion.div>
-                  )}
-                </div>
+                    {/* Loading dots */}
+                    {isLoading && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex items-center gap-1 py-2"
+                      >
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </motion.div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-                {/* Input - with button border style */}
+            {/* Ask AI button / Input - transforms between states */}
+            <motion.div
+              layout
+              className="relative"
+            >
+              {!isChatActive ? (
+                <motion.button
+                  layoutId="chat-input"
+                  onClick={openChat}
+                  className="px-8 py-3.5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full hover:border-[var(--gray-400)] transition-colors"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Ask AI
+                </motion.button>
+              ) : (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.15, duration: 0.3 }}
+                  layoutId="chat-input"
                   className="relative"
                 >
                   <input
@@ -416,12 +458,11 @@ export function Hero() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="write here"
                     disabled={isLoading}
-                    className="w-auto min-w-[200px] px-8 py-3.5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full outline-none text-center placeholder:text-[var(--gray-400)] focus:border-[var(--gray-400)] transition-colors"
+                    autoFocus
+                    className="min-w-[200px] px-8 py-3.5 text-sm font-medium tracking-wide bg-white text-[var(--black)] border border-[var(--gray-300)] rounded-full outline-none text-left focus:border-[var(--gray-400)] transition-colors caret-[var(--gray-500)]"
                   />
 
-                  {/* Send button - appears when there's input */}
                   <AnimatePresence>
                     {input.trim() && (
                       <motion.button
@@ -437,19 +478,24 @@ export function Hero() {
                     )}
                   </AnimatePresence>
                 </motion.div>
+              )}
+            </motion.div>
 
-                {/* Close hint */}
+            {/* ESC hint - only when chat is active */}
+            <AnimatePresence>
+              {isChatActive && (
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="text-xs text-[var(--gray-400)] mt-8"
+                  exit={{ opacity: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-xs text-[var(--gray-400)] mt-6"
                 >
                   press <kbd className="px-1.5 py-0.5 bg-[var(--gray-100)] rounded text-[var(--gray-500)]">esc</kbd> to close
                 </motion.p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              )}
+            </AnimatePresence>
+          </LayoutGroup>
         </div>
       </Container>
     </section>
