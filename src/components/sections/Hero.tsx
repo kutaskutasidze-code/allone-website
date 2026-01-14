@@ -313,190 +313,190 @@ export function Hero() {
   };
 
   return (
-    <section className="min-h-[100svh] flex items-center justify-center relative overflow-hidden">
+    <section className="min-h-[100svh] relative overflow-hidden">
       <ConnectedNodes />
 
       <Container>
-        <div className="flex flex-col items-center text-center pt-28 pb-16 lg:pt-36 lg:pb-20 relative z-10 min-h-[400px] justify-center">
-          {/* Headline, description, View Our Work - fade out when chat active */}
-          <AnimatePresence>
-            {!isChatActive && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="flex flex-col items-center"
+        {/* Fixed height container - button position never changes */}
+        <div className="min-h-[100svh] flex flex-col items-center justify-center relative z-10 py-20">
+
+          {/* Upper content area - fixed height so button stays in place */}
+          <div className="h-[280px] flex flex-col items-center justify-end mb-8">
+            {/* Hero content - fades out */}
+            <div
+              className={`
+                flex flex-col items-center text-center
+                transition-all duration-500 ease-out
+                ${isChatActive ? 'opacity-0 pointer-events-none translate-y-4' : 'opacity-100 translate-y-0'}
+              `}
+            >
+              <div className="mb-6">
+                <ShimmerText
+                  text="The Future Runs Itself"
+                  className="text-[clamp(2.5rem,6vw,4rem)] font-light leading-[1.1] tracking-[-0.02em]"
+                  delay={0.2}
+                />
+              </div>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="text-base lg:text-lg text-[var(--gray-500)] max-w-md leading-relaxed mb-8"
               >
-                <div className="mb-6">
-                  <ShimmerText
-                    text="The Future Runs Itself"
-                    className="text-[clamp(2.5rem,6vw,4rem)] font-light leading-[1.1] tracking-[-0.02em]"
-                    delay={0.2}
-                  />
-                </div>
+                We design and build intelligent automation systems that
+                transform how businesses operate, scale, and compete.
+              </motion.p>
 
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.5 }}
-                  className="text-base lg:text-lg text-[var(--gray-500)] max-w-md leading-relaxed mb-10"
-                >
-                  We design and build intelligent automation systems that
-                  transform how businesses operate, scale, and compete.
-                </motion.p>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.7 }}
-                  className="mb-4"
-                >
-                  <GlassButton
-                    href="/projects"
-                    variant="primary"
-                    size="lg"
-                    rightIcon={<ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
-                    className="group"
-                  >
-                    View Our Work
-                  </GlassButton>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Messages - appear above the button/input when chat is active */}
-          <AnimatePresence>
-            {isChatActive && messages.length > 0 && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="w-full max-w-lg mb-6 relative"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.7 }}
               >
-                <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
-                <div
-                  ref={messagesContainerRef}
-                  className="max-h-[180px] overflow-y-auto px-4 pt-10 pb-2"
-                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                <GlassButton
+                  href="/projects"
+                  variant="primary"
+                  size="lg"
+                  rightIcon={<ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
+                  className="group"
                 >
-                  <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
-                  {messages.map((message) => (
-                    <motion.div
-                      key={message.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.25 }}
-                      className="mb-4"
-                    >
-                      {message.role === 'user' ? (
-                        <p className="text-sm text-[var(--gray-500)] text-left">{message.content}</p>
-                      ) : (
-                        <p className="text-[15px] text-[var(--black)] leading-relaxed text-left">
-                          {streamingMessageId === message.id ? (
-                            <TypewriterText text={message.content} onComplete={() => setStreamingMessageId(null)} />
-                          ) : (
-                            message.content
-                          )}
-                        </p>
-                      )}
-                    </motion.div>
-                  ))}
-                  {isLoading && (
-                    <div className="flex items-center gap-1.5 py-2">
-                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse" />
-                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:150ms]" />
-                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:300ms]" />
-                    </div>
-                  )}
-                </div>
+                  View Our Work
+                </GlassButton>
               </motion.div>
-            )}
-          </AnimatePresence>
+            </div>
 
-          {/* Ask AI button that EXPANDS into input - stays in place */}
+            {/* Messages area - fades in, positioned in the same space */}
+            <div
+              className={`
+                absolute w-full max-w-lg px-4
+                transition-all duration-500 ease-out
+                ${isChatActive && messages.length > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+              `}
+              style={{ bottom: '70px' }}
+            >
+              <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white to-transparent z-10 pointer-events-none" />
+              <div
+                ref={messagesContainerRef}
+                className="max-h-[200px] overflow-y-auto pt-8 pb-2"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
+                {messages.map((message) => (
+                  <div key={message.id} className="mb-4 animate-fade-in">
+                    {message.role === 'user' ? (
+                      <p className="text-sm text-[var(--gray-500)] text-left">{message.content}</p>
+                    ) : (
+                      <p className="text-[15px] text-[var(--black)] leading-relaxed text-left">
+                        {streamingMessageId === message.id ? (
+                          <TypewriterText text={message.content} onComplete={() => setStreamingMessageId(null)} />
+                        ) : (
+                          message.content
+                        )}
+                      </p>
+                    )}
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex items-center gap-1.5 py-2">
+                    <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse" />
+                    <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:150ms]" />
+                    <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:300ms]" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Ask AI - Button that expands into input */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9 }}
-            className="relative flex items-center justify-center"
+            className="relative"
           >
-            {/* The button/input container - expands in place */}
-            <div
-              onClick={!isChatActive ? openChat : undefined}
-              className={`
-                relative h-11 rounded-full overflow-hidden
-                transition-all duration-300 ease-out
-                ${isChatActive ? 'w-[320px] sm:w-[400px]' : 'w-[120px] cursor-pointer'}
-              `}
-            >
-              {/* Gradient border layer */}
-              <span className="absolute inset-0 rounded-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 opacity-60" />
-
-              {/* White background inside */}
-              <span className="absolute inset-[1px] rounded-full bg-white" />
-
-              {/* "Ask AI" text - fades out */}
-              <span
+            <div className="relative flex items-center">
+              {/* Gradient border wrapper */}
+              <div
                 className={`
-                  absolute inset-0 flex items-center justify-center
-                  text-sm font-medium tracking-wide text-[var(--black)]
-                  transition-opacity duration-200
-                  ${isChatActive ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+                  relative rounded-full p-[1px]
+                  bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200
+                  transition-all duration-500 ease-out
+                  ${isChatActive ? 'w-[320px] sm:w-[380px]' : 'w-[130px]'}
                 `}
               >
-                Ask AI
-              </span>
+                {/* Inner white container */}
+                <div
+                  onClick={!isChatActive ? openChat : undefined}
+                  className={`
+                    relative h-[46px] rounded-full bg-white
+                    flex items-center justify-center
+                    ${!isChatActive ? 'cursor-pointer hover:bg-gray-50' : ''}
+                    transition-colors duration-200
+                  `}
+                >
+                  {/* "Ask AI" text */}
+                  <span
+                    className={`
+                      text-sm font-medium tracking-wide text-[var(--black)]
+                      transition-all duration-300
+                      ${isChatActive ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}
+                    `}
+                  >
+                    Ask AI
+                  </span>
 
-              {/* Input field - fades in */}
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isLoading || !isChatActive}
-                className={`
-                  absolute inset-0 w-full h-full px-5 pr-12
-                  text-sm font-medium tracking-wide
-                  bg-transparent text-[var(--black)] rounded-full
-                  outline-none text-left caret-[var(--gray-500)]
-                  transition-opacity duration-200
-                  ${isChatActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-                `}
-              />
+                  {/* Input */}
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={isLoading || !isChatActive}
+                    className={`
+                      absolute inset-0 w-full h-full px-5 pr-12
+                      text-sm font-medium tracking-wide
+                      bg-transparent text-[var(--black)] rounded-full
+                      outline-none text-left caret-[var(--gray-500)]
+                      transition-all duration-300
+                      ${isChatActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}
+                    `}
+                  />
 
-              {/* Send button */}
+                  {/* Send button */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); sendMessage(); }}
+                    disabled={isLoading || !input.trim()}
+                    className={`
+                      absolute right-4 top-1/2 -translate-y-1/2
+                      transition-all duration-200
+                      ${isChatActive && input.trim()
+                        ? 'opacity-100 text-[var(--gray-500)] hover:text-[var(--black)]'
+                        : 'opacity-0 pointer-events-none'}
+                    `}
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Close button */}
               <button
-                onClick={(e) => { e.stopPropagation(); sendMessage(); }}
-                disabled={isLoading || !input.trim()}
+                onClick={closeChat}
                 className={`
-                  absolute right-4 top-1/2 -translate-y-1/2 p-1
-                  transition-all duration-200
-                  ${isChatActive && input.trim() ? 'opacity-100 text-[var(--gray-600)] hover:text-[var(--black)]' : 'opacity-0 pointer-events-none'}
+                  ml-3 p-2 rounded-full
+                  text-[var(--gray-400)] hover:text-[var(--gray-600)] hover:bg-gray-100
+                  transition-all duration-300
+                  ${isChatActive ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}
                 `}
+                aria-label="Close chat"
               >
-                <Send className="w-4 h-4" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
               </button>
             </div>
-
-            {/* Close button - appears when chat is active */}
-            <button
-              onClick={closeChat}
-              className={`
-                absolute -right-10 p-2 text-[var(--gray-400)] hover:text-[var(--gray-600)]
-                transition-all duration-200
-                ${isChatActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-              `}
-              aria-label="Close chat"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
           </motion.div>
         </div>
       </Container>
