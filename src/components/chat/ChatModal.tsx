@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Bot, User, Loader2 } from 'lucide-react';
+import { X, Send, Bot, User, Loader2, Mic, MicOff } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -25,8 +25,12 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -107,6 +111,77 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        stream.getTracks().forEach(track => track.stop());
+        await transcribeAudio(audioBlob);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      alert('Could not access microphone. Please allow microphone permissions.');
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    setIsTranscribing(true);
+    try {
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (data.text) {
+        setInput((prev) => prev + (prev ? ' ' : '') + data.text);
+        inputRef.current?.focus();
+      }
+    } catch (error) {
+      console.error('Transcription error:', error);
+      alert('Failed to transcribe audio. Please try again.');
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
     }
   };
 
@@ -209,10 +284,30 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Type your message..."
+                  placeholder={isTranscribing ? "Transcribing..." : isRecording ? "Listening..." : "Type or speak your message..."}
                   className="flex-1 px-4 py-3 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
-                  disabled={isLoading}
+                  disabled={isLoading || isTranscribing}
                 />
+                <button
+                  onClick={toggleRecording}
+                  disabled={isLoading || isTranscribing}
+                  className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
+                    isRecording
+                      ? 'bg-red-500 text-white animate-pulse'
+                      : isTranscribing
+                        ? 'bg-gray-300 text-gray-500'
+                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                  } disabled:cursor-not-allowed`}
+                  aria-label={isRecording ? "Stop recording" : "Start recording"}
+                >
+                  {isTranscribing ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isRecording ? (
+                    <MicOff className="w-4 h-4" />
+                  ) : (
+                    <Mic className="w-4 h-4" />
+                  )}
+                </button>
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim() || isLoading}
