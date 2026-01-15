@@ -133,7 +133,7 @@ This email was sent from the ALLONE website contact form.
     // Send actual email in production
     await transporter.sendMail({
       from: process.env.SMTP_FROM || '"ALLONE Website" <noreply@allone.ai>',
-      to: process.env.CONTACT_EMAIL || 'hello@allone.ai',
+      to: process.env.CONTACT_EMAIL || 'info@allone.ge',
       replyTo: data.email,
       subject: `New Contact: ${data.name} - ${serviceLabel}`,
       text: textContent,

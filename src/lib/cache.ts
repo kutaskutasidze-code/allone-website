@@ -172,7 +172,7 @@ export async function getCachedContactInfo() {
   }
 
   return data || {
-    email: 'hello@allone.ai',
+    email: 'info@allone.ge',
     location: 'San Francisco, CA',
     phone: null,
   };

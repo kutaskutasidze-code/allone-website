@@ -95,7 +95,7 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: "I'm sorry, I'm having trouble connecting right now. Please try again or contact us directly at hello@allone.ge",
+        content: "I'm sorry, I'm having trouble connecting right now. Please try again or contact us directly at info@allone.ge",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {

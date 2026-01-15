@@ -16,7 +16,7 @@ interface ContactInfo {
 export function Footer() {
   const currentYear = new Date().getFullYear();
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
-    email: 'hello@allone.ai',
+    email: 'info@allone.ge',
     location: 'San Francisco, CA',
   });
 

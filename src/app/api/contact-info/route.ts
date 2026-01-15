@@ -3,7 +3,7 @@ import { success, error } from '@/lib/api-response';
 import { logger } from '@/lib/logger';
 
 const DEFAULT_CONTACT_INFO = {
-  email: 'hello@allone.ai',
+  email: 'info@allone.ge',
   location: 'San Francisco, CA',
   phone: null,
 };

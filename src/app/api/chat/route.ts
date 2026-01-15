@@ -121,7 +121,7 @@ If they can't use Calendly, offer to collect their email and have the team reach
 
 To get started with ALLONE:
 - Visit our website: allone.ge
-- Email: hello@allone.ge
+- Email: info@allone.ge
 - Schedule a consultation through our contact page
 
 ## Pricing
@@ -172,7 +172,7 @@ Special capabilities:
    - Say something like: "Great! You can book a time that works for you here: https://calendly.com/allone-demo/30min - Pick any slot that's convenient and we'll see you there!"
    - If they prefer, offer to have the team reach out by collecting their email
 
-3. CONTACT: For immediate questions, direct them to hello@allone.ge`;
+3. CONTACT: For immediate questions, direct them to info@allone.ge`;
 
 export async function POST(request: NextRequest) {
   try {
