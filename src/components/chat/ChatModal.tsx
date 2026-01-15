@@ -208,22 +208,22 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
             className="fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-white z-50 flex flex-col shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-black/10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center">
                   <Bot className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">ALLONE Assistant</h3>
-                  <p className="text-xs text-gray-500">Ask me about AI automation</p>
+                  <h3 className="font-semibold text-black">ALLONE Assistant</h3>
+                  <p className="text-xs text-black">Ask me about AI automation</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-black/5 rounded-full transition-colors"
                 aria-label="Close chat"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5 text-black" />
               </button>
             </div>
 
@@ -236,11 +236,11 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
                 >
                   <div
                     className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${
-                      message.role === 'user' ? 'bg-gray-200' : 'bg-black'
+                      message.role === 'user' ? 'bg-black/10' : 'bg-black'
                     }`}
                   >
                     {message.role === 'user' ? (
-                      <User className="w-4 h-4 text-gray-600" />
+                      <User className="w-4 h-4 text-black" />
                     ) : (
                       <Bot className="w-4 h-4 text-white" />
                     )}
@@ -249,7 +249,7 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
                     className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                       message.role === 'user'
                         ? 'bg-black text-white rounded-tr-sm'
-                        : 'bg-gray-100 text-gray-800 rounded-tl-sm'
+                        : 'bg-black/5 text-black rounded-tl-sm'
                     }`}
                   >
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
@@ -263,10 +263,10 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
                   <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center">
                     <Bot className="w-4 h-4 text-white" />
                   </div>
-                  <div className="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3">
+                  <div className="bg-black/5 rounded-2xl rounded-tl-sm px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
-                      <span className="text-sm text-gray-500">Thinking...</span>
+                      <Loader2 className="w-4 h-4 animate-spin text-black" />
+                      <span className="text-sm text-black">Thinking...</span>
                     </div>
                   </div>
                 </div>
@@ -276,7 +276,7 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-gray-100">
+            <div className="p-4 border-t border-black/10">
               <div className="flex items-center gap-2">
                 <input
                   ref={inputRef}
@@ -285,7 +285,7 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={isTranscribing ? "Transcribing..." : isRecording ? "Listening..." : "Type or speak your message..."}
-                  className="flex-1 px-4 py-3 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-black/10"
+                  className="flex-1 px-4 py-3 bg-black/5 rounded-full text-sm text-black placeholder:text-black/50 focus:outline-none focus:ring-2 focus:ring-black/20"
                   disabled={isLoading || isTranscribing}
                 />
                 <button
@@ -295,8 +295,8 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
                     isRecording
                       ? 'bg-red-500 text-white animate-pulse'
                       : isTranscribing
-                        ? 'bg-gray-300 text-gray-500'
-                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        ? 'bg-black/10 text-black/50'
+                        : 'bg-black/10 text-black hover:bg-black/20'
                   } disabled:cursor-not-allowed`}
                   aria-label={isRecording ? "Stop recording" : "Start recording"}
                 >
@@ -311,13 +311,13 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
                 <button
                   onClick={sendMessage}
                   disabled={!input.trim() || isLoading}
-                  className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center hover:bg-black/80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   aria-label="Send message"
                 >
                   <Send className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-[10px] text-gray-400 text-center mt-2">
+              <p className="text-[10px] text-black/60 text-center mt-2">
                 Powered by ALLONE AI
               </p>
             </div>

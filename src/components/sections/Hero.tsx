@@ -397,9 +397,9 @@ export function Hero() {
                   {messages.map((message) => (
                     <div key={message.id} className="animate-fade-in">
                       {message.role === 'user' ? (
-                        <p className="text-sm text-[var(--gray-500)] text-left">{message.content}</p>
+                        <p className="text-sm text-black text-left">{message.content}</p>
                       ) : (
-                        <p className="text-[15px] text-[var(--black)] leading-relaxed text-left">
+                        <p className="text-[15px] text-black leading-relaxed text-left">
                           {streamingMessageId === message.id ? (
                             <TypewriterText
                               text={message.content}
@@ -417,9 +417,9 @@ export function Hero() {
                   {/* Loading indicator */}
                   {isLoading && (
                     <div className="flex items-center gap-1.5 py-2">
-                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse" />
-                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:150ms]" />
-                      <span className="w-1.5 h-1.5 bg-[var(--gray-400)] rounded-full animate-pulse [animation-delay:300ms]" />
+                      <span className="w-1.5 h-1.5 bg-black rounded-full animate-pulse" />
+                      <span className="w-1.5 h-1.5 bg-black rounded-full animate-pulse [animation-delay:150ms]" />
+                      <span className="w-1.5 h-1.5 bg-black rounded-full animate-pulse [animation-delay:300ms]" />
                     </div>
                   )}
                 </div>
@@ -476,9 +476,9 @@ export function Hero() {
                   className={`
                     absolute inset-0 w-full h-full px-5 pr-12
                     text-sm font-medium tracking-wide
-                    bg-transparent text-[var(--black)] rounded-full
-                    outline-none text-left caret-[var(--gray-500)]
-                    placeholder:text-gray-400 placeholder:font-normal
+                    bg-transparent text-black rounded-full
+                    outline-none text-left caret-black
+                    placeholder:text-black/50 placeholder:font-normal
                     transition-all duration-300
                     ${isChatActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}
                   `}
@@ -492,7 +492,7 @@ export function Hero() {
                     absolute right-4 top-1/2 -translate-y-1/2
                     transition-all duration-200
                     ${isChatActive && input.trim()
-                      ? 'opacity-100 text-[var(--gray-500)] hover:text-[var(--black)]'
+                      ? 'opacity-100 text-black hover:text-black/70'
                       : 'opacity-0 pointer-events-none'}
                   `}
                 >
@@ -507,7 +507,7 @@ export function Hero() {
               className={`
                 absolute left-full ml-3 top-1/2 -translate-y-1/2
                 p-2 rounded-full
-                text-[var(--gray-400)] hover:text-[var(--gray-600)] hover:bg-gray-100
+                text-black hover:text-black/70 hover:bg-black/5
                 transition-all duration-300
                 ${isChatActive ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}
               `}
