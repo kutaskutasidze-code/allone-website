@@ -1,13 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Mail, MapPin, Phone, ArrowRight, Calendar } from 'lucide-react';
+import { Mail, MapPin, Phone, ArrowRight } from 'lucide-react';
 import { AnimatedBorderCard } from '@/components/ui/animated-border-card';
-import { CalendlyButton, CalendlyPlaceholder } from '@/components/ui/CalendlyButton';
-import { useTranslation } from '@/contexts';
-
-// Set your Calendly URL here after creating your account
-const CALENDLY_URL = ''; // e.g., 'https://calendly.com/your-username/30min'
 
 interface ContactInfo {
   email: string;
@@ -20,8 +15,6 @@ interface ContactContentProps {
 }
 
 export function ContactContent({ contactInfo }: ContactContentProps) {
-  const { t } = useTranslation();
-
   return (
     <section className="min-h-screen bg-white pt-28 pb-20 lg:pt-36 lg:pb-28 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -33,13 +26,13 @@ export function ContactContent({ contactInfo }: ContactContentProps) {
           className="max-w-3xl mb-16"
         >
           <p className="text-zinc-500 text-sm font-medium tracking-wide uppercase mb-4">
-            {t('cta.button')}
+            Get in Touch
           </p>
           <h1 className="text-4xl lg:text-6xl font-light text-zinc-900 leading-[1.1] mb-6">
-            {t('contact.title')}
+            Let's Talk
           </h1>
           <p className="text-lg text-zinc-600 leading-relaxed">
-            {t('contact.subtitle')}
+            Have a project in mind? We'd love to hear about it.
           </p>
         </motion.div>
 
@@ -61,7 +54,7 @@ export function ContactContent({ contactInfo }: ContactContentProps) {
                   <Mail className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">{t('contact.email')}</p>
+                  <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">Email</p>
                   <p className="text-zinc-900 font-medium group-hover:text-zinc-700 transition-colors">
                     {contactInfo.email}
                   </p>
@@ -81,7 +74,7 @@ export function ContactContent({ contactInfo }: ContactContentProps) {
                     <Phone className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">{t('contact.phone')}</p>
+                    <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">Phone</p>
                     <p className="text-zinc-900 font-medium group-hover:text-zinc-700 transition-colors">
                       {contactInfo.phone}
                     </p>
@@ -97,43 +90,16 @@ export function ContactContent({ contactInfo }: ContactContentProps) {
                 <MapPin className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">{t('contact.location')}</p>
+                <p className="text-xs uppercase tracking-wider text-zinc-500 mb-1">Location</p>
                 <p className="text-zinc-900 font-medium">
                   {contactInfo.location}
                 </p>
               </div>
             </div>
 
-            {/* Schedule Demo Card */}
-            <div className="flex items-start gap-4 p-5 rounded-2xl bg-zinc-900 border border-zinc-800">
-              <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-5 h-5 text-zinc-900" />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs uppercase tracking-wider text-zinc-400 mb-1">{t('contact.scheduleDemo')}</p>
-                <p className="text-white text-sm mb-3">
-                  {t('contact.scheduleDemoDesc')}
-                </p>
-                {CALENDLY_URL ? (
-                  <CalendlyButton
-                    url={CALENDLY_URL}
-                    text={t('contact.scheduleDemo')}
-                    variant="secondary"
-                    size="sm"
-                  />
-                ) : (
-                  <CalendlyPlaceholder
-                    text={t('contact.scheduleDemo')}
-                    variant="secondary"
-                    size="sm"
-                  />
-                )}
-              </div>
-            </div>
-
             {/* Response Time */}
             <p className="text-sm text-zinc-500 pl-1">
-              {t('contact.responseTime')}
+              We typically respond within 24 hours
             </p>
           </motion.div>
 

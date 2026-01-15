@@ -350,8 +350,7 @@ export function Hero() {
                 transition={{ duration: 0.8, delay: 0.5 }}
                 className="text-base lg:text-lg text-[var(--gray-500)] max-w-md leading-relaxed mb-8"
               >
-                We design and build intelligent automation systems that
-                transform how businesses operate, scale, and compete.
+                We design and build intelligent automation systems that transform how businesses operate, scale, and compete.
               </motion.p>
 
               <motion.div
