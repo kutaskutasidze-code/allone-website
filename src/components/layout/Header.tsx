@@ -10,12 +10,14 @@ import { cn } from '@/lib/utils';
 import { Container } from './Container';
 import { navigation } from '@/data/navigation';
 import { GlassButton } from '@/components/ui/GlassButton';
-import { useContactInfo } from '@/contexts';
+import { LanguageToggle } from '@/components/ui/LanguageToggle';
+import { useContactInfo, useTranslation } from '@/contexts';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { contactInfo } = useContactInfo();
+  const { t } = useTranslation();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -119,13 +121,14 @@ export function Header() {
                       : 'text-[var(--gray-500)] hover:text-[var(--black)]'
                   )}
                 >
-                  {item.label}
+                  {t(`nav.${item.key}`)}
                 </Link>
               ))}
             </div>
 
-            {/* Desktop CTA */}
-            <div className="hidden md:block">
+            {/* Language Toggle + Desktop CTA */}
+            <div className="hidden md:flex items-center gap-4">
+              <LanguageToggle />
               <GlassButton
                 href="/contact"
                 variant="primary"
@@ -133,7 +136,7 @@ export function Header() {
                 rightIcon={<ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />}
                 className="group"
               >
-                Get in touch
+                {t('cta.button')}
               </GlassButton>
             </div>
 
@@ -179,15 +182,20 @@ export function Header() {
                           : 'text-[var(--gray-400)]'
                       )}
                     >
-                      {item.label}
+                      {item.key ? t(`nav.${item.key}`) : item.label}
                     </a>
                   </div>
                 ))}
               </nav>
 
-              <div className="pt-8 border-t border-[var(--gray-200)]">
+              {/* Mobile Language Toggle */}
+              <div className="py-6 flex justify-center">
+                <LanguageToggle />
+              </div>
+
+              <div className="pt-6 border-t border-[var(--gray-200)]">
                 <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--gray-400)] mb-3">
-                  Get in touch
+                  {t('cta.button')}
                 </p>
                 <a
                   href={`mailto:${contactInfo.email}`}

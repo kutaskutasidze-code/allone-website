@@ -31,6 +31,7 @@ export type {
 export interface NavItem {
   label: string;
   href: string;
+  key?: string;
 }
 
 export interface ContactFormData {
