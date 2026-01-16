@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { ShimmerText } from '@/components/ui/ShimmerText';
 import { ArrowRight, Send } from 'lucide-react';
-import { LiquidMetal } from '@paper-design/shaders-react';
+import { LiquidMetal, PulsingBorder } from '@paper-design/shaders-react';
 
 interface Node {
   x: number;
@@ -328,7 +328,7 @@ export function Hero() {
         <div className="min-h-[100svh] flex flex-col items-center justify-center relative z-10 py-20">
 
           {/* Upper content area - fixed height so button stays in place */}
-          <div className="h-[280px] flex flex-col items-center justify-end mb-8 relative">
+          <div className="h-[260px] flex flex-col items-center justify-end mb-4 relative">
             {/* Hero content - fades out */}
             <div
               className={`
@@ -349,26 +349,11 @@ export function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
-                className="text-base lg:text-lg text-[var(--gray-500)] max-w-md leading-relaxed mb-8"
+                className="text-base lg:text-lg text-[var(--gray-500)] max-w-md leading-relaxed"
               >
                 We design and build intelligent automation systems that transform how businesses operate, scale, and compete.
               </motion.p>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.7 }}
-              >
-                <GlassButton
-                  href="/projects"
-                  variant="primary"
-                  size="lg"
-                  rightIcon={<ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />}
-                  className="group"
-                >
-                  View Our Work
-                </GlassButton>
-              </motion.div>
             </div>
 
             {/* Chat messages area - classic chatbot layout */}
@@ -433,91 +418,118 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.9 }}
-            className="relative flex justify-center"
+            className="relative flex justify-center items-center"
           >
-            {/* LiquidMetal border wrapper - centered */}
+            {/* PulsingBorder container */}
             <div
               className={`
-                relative rounded-full
+                relative flex items-center justify-center
                 transition-all duration-500 ease-out
-                ${isChatActive ? 'w-[320px] sm:w-[380px]' : 'w-[132px]'}
+                ${isChatActive ? 'w-[500px] sm:w-[540px] h-[80px]' : 'w-[320px] h-[80px]'}
               `}
             >
-              {/* LiquidMetal shader as animated border */}
-              <div className="absolute inset-0 rounded-full overflow-hidden">
-                <LiquidMetal
-                  speed={1}
-                  softness={0.1}
-                  repetition={2}
-                  shiftRed={0.3}
-                  shiftBlue={0.3}
-                  distortion={0.07}
-                  contour={0.4}
+              {/* PulsingBorder shader - hidden when chat active */}
+              <div className={`absolute inset-0 transition-opacity duration-500 ${isChatActive ? 'opacity-0' : 'opacity-100'}`}>
+                <PulsingBorder
+                  speed={0.79}
+                  roundness={1}
+                  thickness={0.03}
+                  softness={0.75}
+                  intensity={0.25}
+                  bloom={0.3}
+                  spots={5}
+                  spotSize={0.5}
+                  pulse={0.25}
+                  smoke={0.3}
+                  smokeSize={0.6}
                   scale={0.6}
                   rotation={0}
-                  shape="metaballs"
-                  angle={70}
+                  aspectRatio="auto"
+                  colors={['#233944', '#262426', '#F6F3F3C2']}
                   colorBack="#00000000"
-                  colorTint="#FFFFFF"
                   className="w-full h-full"
                 />
               </div>
 
-              {/* Inner white container */}
-              <div
-                onClick={!isChatActive ? openChat : undefined}
-                className={`
-                  relative h-[46px] rounded-full bg-white m-[2px]
-                  flex items-center justify-center
-                  ${!isChatActive ? 'cursor-pointer hover:bg-gray-50' : ''}
-                  transition-colors duration-200
-                `}
-              >
-                {/* "Ask AI" text */}
-                <span
+              {/* Inner content - LiquidMetal + Button */}
+              <div className={`relative z-10 flex items-center gap-3 ${isChatActive ? '' : 'pl-4'}`}>
+                {/* LiquidMetal circle on left */}
+                <div className={`flex-shrink-0 transition-all duration-500 overflow-hidden ${isChatActive ? 'opacity-0 scale-90 w-0' : 'opacity-100 scale-100'}`}>
+                  <LiquidMetal
+                    speed={0.68}
+                    softness={0.1}
+                    repetition={2}
+                    shiftRed={0.3}
+                    shiftBlue={0.3}
+                    distortion={0.07}
+                    contour={0.4}
+                    scale={0.6}
+                    rotation={0}
+                    shape="circle"
+                    angle={70}
+                    image="https://workers.paper.design/file-assets/01KF3FJDBVRQRC2Z21M10KBDQ5/01KF3JVMCGH3M6TG0XEQ9ZA6S3.svg"
+                    colorBack="#00000000"
+                    colorTint="#FFFFFF"
+                    className="w-[56px] h-[56px] rounded-full"
+                  />
+                </div>
+
+                {/* Ask AI button / Input area */}
+                <div
+                  onClick={!isChatActive ? openChat : undefined}
                   className={`
-                    text-sm font-medium tracking-wide text-[var(--black)]
-                    transition-all duration-300
-                    ${isChatActive ? 'opacity-0 scale-90' : 'opacity-100 scale-100'}
+                    relative h-[50px] rounded-full
+                    flex items-center justify-center
+                    transition-all duration-500 ease-out
+                    ${!isChatActive ? 'cursor-pointer w-[140px]' : 'w-[420px] sm:w-[460px]'}
                   `}
                 >
-                  Ask AI
-                </span>
+                  {/* "Ask AI" text */}
+                  <span
+                    className={`
+                      text-base font-medium tracking-wide text-[var(--black)]
+                      transition-all duration-300
+                      ${isChatActive ? 'opacity-0 scale-90 absolute' : 'opacity-100 scale-100'}
+                    `}
+                  >
+                    Ask AI
+                  </span>
 
-                {/* Input */}
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  disabled={isLoading || !isChatActive}
-                  placeholder={isChatActive ? "Ask me anything..." : ""}
-                  className={`
-                    absolute inset-0 w-full h-full px-5 pr-12
-                    text-sm font-medium tracking-wide
-                    bg-transparent text-black rounded-full
-                    outline-none text-left caret-black
-                    placeholder:text-black/50 placeholder:font-normal
-                    transition-all duration-300
-                    ${isChatActive ? 'opacity-100' : 'opacity-0 pointer-events-none'}
-                  `}
-                />
+                  {/* Input */}
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={isLoading || !isChatActive}
+                    placeholder={isChatActive ? "Ask me anything..." : ""}
+                    className={`
+                      w-full h-full px-6 pr-12
+                      text-sm font-medium tracking-wide
+                      bg-transparent text-black rounded-full
+                      outline-none text-left caret-black
+                      placeholder:text-black/50 placeholder:font-normal
+                      transition-all duration-300
+                      ${isChatActive ? 'opacity-100' : 'opacity-0 pointer-events-none absolute'}
+                    `}
+                  />
 
-                {/* Send button */}
-                <button
-                  onClick={(e) => { e.stopPropagation(); sendMessage(); }}
-                  disabled={isLoading || !input.trim()}
-                  className={`
-                    absolute right-4 top-1/2 -translate-y-1/2
-                    transition-all duration-200
-                    ${isChatActive && input.trim()
-                      ? 'opacity-100 text-black hover:text-black/70'
-                      : 'opacity-0 pointer-events-none'}
-                  `}
-                >
-                  <Send className="w-4 h-4" />
-                </button>
+                  {/* Send button - only shows when typing */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); sendMessage(); }}
+                    disabled={isLoading || !input.trim()}
+                    className={`
+                      absolute right-4 top-1/2 -translate-y-1/2
+                      transition-all duration-200
+                      ${isChatActive && input.trim()
+                        ? 'opacity-100 text-black hover:text-black/70'
+                        : 'opacity-0 pointer-events-none'}
+                    `}
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 

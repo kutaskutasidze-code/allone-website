@@ -9,6 +9,7 @@ import {
   LayeredScreens,
   defaultContent,
 } from './services';
+import { PulsingBorder } from '@paper-design/shaders-react';
 
 // Helper to get service by card_type
 function getServiceByType(services: Service[], cardType: string): Service | undefined {
@@ -260,14 +261,29 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
                 </div>
 
                 {/* CTA Button */}
-                <div className="relative group">
-                  <div
-                    className="absolute -inset-2 rounded-full opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-300"
-                    style={{ background: 'rgba(255,255,255,0.15)' }}
+                <div className="relative inline-flex items-center justify-center w-[260px] h-[90px]">
+                  <PulsingBorder
+                    speed={1}
+                    roundness={1}
+                    thickness={0.08}
+                    softness={0.75}
+                    intensity={0.2}
+                    bloom={0.25}
+                    spots={5}
+                    spotSize={0.5}
+                    pulse={0.25}
+                    smoke={0.3}
+                    smokeSize={0.6}
+                    scale={0.6}
+                    rotation={0}
+                    aspectRatio="auto"
+                    colors={['#727373', '#F5F2F5', '#0C0A09CC']}
+                    colorBack="#00000000"
+                    className="absolute inset-0 w-full h-full"
                   />
                   <a
                     href={consultingService?.cta_url || defaultContent.consulting.cta_url}
-                    className="relative px-8 py-4 bg-white text-zinc-900 rounded-full font-medium hover:bg-zinc-100 transition-colors whitespace-nowrap inline-block"
+                    className="relative z-10 inline-flex items-center justify-center w-[160px] h-[52px] rounded-full bg-black text-white font-medium hover:bg-zinc-900 transition-colors whitespace-nowrap"
                   >
                     {consultingService?.cta_text || defaultContent.consulting.cta_text}
                   </a>

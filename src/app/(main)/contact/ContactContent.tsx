@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { Mail, MapPin, Phone, ArrowRight } from 'lucide-react';
 import { AnimatedBorderCard } from '@/components/ui/animated-border-card';
+import { PulsingBorder } from '@paper-design/shaders-react';
 
 interface ContactInfo {
   email: string;
@@ -120,13 +121,34 @@ export function ContactContent({ contactInfo }: ContactContentProps) {
                 <p className="text-zinc-400 mb-8 max-w-md mx-auto">
                   Drop us an email and tell us about your project. We'll get back to you with ideas and a proposal.
                 </p>
-                <a
-                  href={`mailto:${contactInfo.email}`}
-                  className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white text-zinc-900 font-medium hover:bg-zinc-100 transition-colors"
-                >
-                  Send us an email
-                  <ArrowRight className="w-4 h-4" />
-                </a>
+                <div className="relative inline-flex items-center justify-center w-[370px] h-[90px]">
+                  <PulsingBorder
+                    speed={1}
+                    roundness={1}
+                    thickness={0.08}
+                    softness={0.75}
+                    intensity={0.2}
+                    bloom={0.25}
+                    spots={5}
+                    spotSize={0.5}
+                    pulse={0.25}
+                    smoke={0.3}
+                    smokeSize={0.6}
+                    scale={0.6}
+                    rotation={0}
+                    aspectRatio="auto"
+                    colors={['#727373', '#F5F2F5', '#0C0A09CC']}
+                    colorBack="#00000000"
+                    className="absolute inset-0 w-full h-full"
+                  />
+                  <a
+                    href={`mailto:${contactInfo.email}`}
+                    className="relative z-10 inline-flex items-center justify-center gap-2 w-[220px] h-[52px] rounded-full bg-black text-white font-medium hover:bg-zinc-900 transition-colors"
+                  >
+                    Send us an email
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
               </div>
             </AnimatedBorderCard>
           </motion.div>
