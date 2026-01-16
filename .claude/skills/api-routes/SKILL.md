@@ -26,29 +26,67 @@ src/app/api/
         └── route.ts       # GET, PUT (single row table)
 ```
 
+---
+
+## Authentication Helper (DRY)
+
+**IMPORTANT:** Always use this helper instead of repeating auth checks.
+
+```typescript
+// lib/auth.ts
+import { createClient } from '@/lib/supabase/server';
+import { NextResponse } from 'next/server';
+import { User } from '@supabase/supabase-js';
+
+export class AuthError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AuthError';
+  }
+}
+
+export async function requireAuth(): Promise<{
+  supabase: Awaited<ReturnType<typeof createClient>>;
+  user: User;
+}> {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (error || !user) {
+    throw new AuthError('Unauthorized');
+  }
+
+  return { supabase, user };
+}
+
+// Response helper for auth errors
+export function handleAuthError(error: unknown) {
+  if (error instanceof AuthError) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  console.error('API Error:', error);
+  return NextResponse.json(
+    { error: 'Internal server error' },
+    { status: 500 }
+  );
+}
+```
+
+---
+
 ## Standard CRUD Route Template
 
 ### Collection Route (`route.ts`)
 
 ```typescript
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireAuth, handleAuthError } from '@/lib/auth';
 
 // GET - List all items
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const { supabase } = await requireAuth();
 
-    // Check authentication
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Fetch data
     const { data, error } = await supabase
       .from('table_name')
       .select('*')
@@ -60,27 +98,14 @@ export async function GET() {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error fetching items:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleAuthError(error);
   }
 }
 
 // POST - Create new item
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    const { supabase } = await requireAuth();
     const body = await request.json();
     const { field1, field2, is_published } = body;
 
@@ -120,11 +145,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error('Error creating item:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleAuthError(error);
   }
 }
 ```
@@ -133,7 +154,7 @@ export async function POST(request: Request) {
 
 ```typescript
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { requireAuth, handleAuthError } from '@/lib/auth';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -143,15 +164,7 @@ interface RouteParams {
 export async function GET(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { supabase } = await requireAuth();
 
     const { data, error } = await supabase
       .from('table_name')
@@ -165,11 +178,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error fetching item:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleAuthError(error);
   }
 }
 
@@ -177,16 +186,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 export async function PUT(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    const { supabase } = await requireAuth();
     const body = await request.json();
 
     const { data, error } = await supabase
@@ -202,11 +202,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error updating item:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleAuthError(error);
   }
 }
 
@@ -214,15 +210,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 export async function DELETE(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const { supabase } = await requireAuth();
 
     const { error } = await supabase
       .from('table_name')
@@ -235,11 +223,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting item:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleAuthError(error);
   }
 }
 ```
@@ -251,8 +235,9 @@ For tables like `contact_info` and `about_content` that only have one row:
 ```typescript
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { requireAuth, handleAuthError } from '@/lib/auth';
 
-// GET - Fetch the single row
+// GET - Fetch the single row (public)
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -277,19 +262,10 @@ export async function GET() {
   }
 }
 
-// PUT - Upsert the single row
+// PUT - Upsert the single row (authenticated)
 export async function PUT(request: Request) {
   try {
-    const supabase = await createClient();
-
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
+    const { supabase } = await requireAuth();
     const body = await request.json();
 
     // Check if row exists
@@ -302,7 +278,6 @@ export async function PUT(request: Request) {
     let data, error;
 
     if (existing) {
-      // Update existing
       ({ data, error } = await supabase
         .from('contact_info')
         .update(body)
@@ -310,7 +285,6 @@ export async function PUT(request: Request) {
         .select()
         .single());
     } else {
-      // Insert new
       ({ data, error } = await supabase
         .from('contact_info')
         .insert(body)
@@ -324,11 +298,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error('Error updating contact info:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return handleAuthError(error);
   }
 }
 ```
@@ -351,17 +321,20 @@ NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 
 ## Authentication Check
 
-Always include this at the start of admin routes:
+**Use the `requireAuth` helper** defined at the top of this document. It:
+- Uses `getUser()` instead of `getSession()` (more secure)
+- Returns both supabase client and user
+- Throws `AuthError` which is caught by `handleAuthError`
 
 ```typescript
-const {
-  data: { session },
-} = await supabase.auth.getSession();
+// Clean and DRY
+const { supabase, user } = await requireAuth();
 
-if (!session) {
-  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-}
+// user.id is available if you need it
+console.log('Request from:', user.id);
 ```
+
+**Never use getSession() directly** - it can be spoofed. Always use `getUser()` which verifies the JWT.
 
 ## Public Routes
 

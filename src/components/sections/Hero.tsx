@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { GlassButton } from '@/components/ui/GlassButton';
 import { ShimmerText } from '@/components/ui/ShimmerText';
 import { ArrowRight, Send } from 'lucide-react';
+import { LiquidMetal } from '@paper-design/shaders-react';
 
 interface Node {
   x: number;
@@ -434,20 +435,39 @@ export function Hero() {
             transition={{ duration: 0.8, delay: 0.9 }}
             className="relative flex justify-center"
           >
-            {/* Gradient border wrapper - centered */}
+            {/* LiquidMetal border wrapper - centered */}
             <div
               className={`
-                relative rounded-full p-[1px]
-                bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200
+                relative rounded-full
                 transition-all duration-500 ease-out
-                ${isChatActive ? 'w-[320px] sm:w-[380px]' : 'w-[130px]'}
+                ${isChatActive ? 'w-[320px] sm:w-[380px]' : 'w-[132px]'}
               `}
             >
+              {/* LiquidMetal shader as animated border */}
+              <div className="absolute inset-0 rounded-full overflow-hidden">
+                <LiquidMetal
+                  speed={1}
+                  softness={0.1}
+                  repetition={2}
+                  shiftRed={0.3}
+                  shiftBlue={0.3}
+                  distortion={0.07}
+                  contour={0.4}
+                  scale={0.6}
+                  rotation={0}
+                  shape="metaballs"
+                  angle={70}
+                  colorBack="#00000000"
+                  colorTint="#FFFFFF"
+                  className="w-full h-full"
+                />
+              </div>
+
               {/* Inner white container */}
               <div
                 onClick={!isChatActive ? openChat : undefined}
                 className={`
-                  relative h-[46px] rounded-full bg-white
+                  relative h-[46px] rounded-full bg-white m-[2px]
                   flex items-center justify-center
                   ${!isChatActive ? 'cursor-pointer hover:bg-gray-50' : ''}
                   transition-colors duration-200
