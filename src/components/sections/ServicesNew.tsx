@@ -51,7 +51,7 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
           {/* Row 1: AI Chatbots + Custom AI - same height */}
           <div className="grid lg:grid-cols-[1.3fr_0.7fr] gap-6 items-start">
             {/* Card 1: AI Chatbots - slides from LEFT */}
-            <ServiceCard direction="left" borderStart="TOP">
+            <ServiceCard direction="left" >
               <div className="relative overflow-hidden h-full">
                 {/* Top-right corner glow - simplified */}
                 <div
@@ -111,7 +111,7 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
             </ServiceCard>
 
             {/* Card 2: Custom AI Solutions - slides from TOP-RIGHT */}
-            <ServiceCard direction="top-right" borderStart="RIGHT">
+            <ServiceCard direction="top-right" >
               <div className="relative overflow-hidden h-full">
                 {/* Bottom center glow - simplified */}
                 <div
@@ -162,7 +162,7 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
           {/* Row 2: Workflow + Website Dev */}
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Card 3: Workflow Automation - slides from TOP-LEFT */}
-            <ServiceCard direction="top-left" borderStart="BOTTOM">
+            <ServiceCard direction="top-left" >
               <div className="relative overflow-hidden h-full">
                 {/* Top-left corner glow - simplified */}
                 <div
@@ -193,7 +193,7 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
             </ServiceCard>
 
             {/* Card 4: Website Development - slides from RIGHT */}
-            <ServiceCard direction="right" borderStart="LEFT">
+            <ServiceCard direction="right" >
               <div className="relative overflow-hidden h-full">
                 {/* Top-right corner glow - simplified */}
                 <div
@@ -239,7 +239,7 @@ export default function ServicesNew({ services = [] }: ServicesNewProps) {
           </div>
 
           {/* Row 3: Strategy & Consulting - slides from BOTTOM */}
-          <ServiceCard direction="bottom" borderStart="RIGHT">
+          <ServiceCard direction="bottom" >
             <div className="relative overflow-hidden h-full">
               {/* Top center spotlight - simplified */}
               <div
