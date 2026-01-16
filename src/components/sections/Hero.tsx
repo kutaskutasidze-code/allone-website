@@ -563,7 +563,7 @@ export function Hero() {
             <button
               onClick={closeChat}
               className={`
-                absolute top-1/2 -translate-y-1/2
+                absolute top-1/2 -translate-y-1/2 z-20
                 p-2 rounded-full
                 text-black hover:text-black/70 hover:bg-black/5
                 transition-all duration-300
