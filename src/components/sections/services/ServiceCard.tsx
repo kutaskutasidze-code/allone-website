@@ -2,16 +2,32 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, useSpring, MotionValue, useInView } from 'framer-motion';
-import { AnimatedBorderCard } from '@/components/ui/animated-border-card';
+import { cn } from '@/lib/utils';
 import { SPRING_CONFIG, DIRECTION_TRANSFORMS, easeOutCubic, type Direction } from './constants';
 
-type BorderDirection = "TOP" | "LEFT" | "BOTTOM" | "RIGHT";
+// Simple static card wrapper (no animated border)
+function StaticCard({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={cn("relative rounded-3xl h-full", className)}>
+      {/* Static border */}
+      <div
+        className="absolute inset-0 rounded-3xl"
+        style={{
+          background: "linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.06) 100%)",
+        }}
+      />
+      {/* Inner card */}
+      <div className="relative z-10 m-[2px] rounded-[22px] bg-[#0a0a0a] overflow-hidden h-[calc(100%-4px)]">
+        {children}
+      </div>
+    </div>
+  );
+}
 
 interface ServiceCardProps {
   children: React.ReactNode;
   className?: string;
   direction?: Direction;
-  borderStart?: BorderDirection;
 }
 
 // Hook to detect mobile devices
@@ -39,7 +55,7 @@ function useScrollSpring(scrollYProgress: MotionValue<number>, outputRange: [num
 }
 
 // Mobile-optimized card with Framer Motion (one-time animation, not scroll-linked)
-function MobileServiceCard({ children, className = '', direction = 'bottom', borderStart = 'TOP' }: ServiceCardProps) {
+function MobileServiceCard({ children, className = '', direction = 'bottom' }: ServiceCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
 
@@ -81,15 +97,15 @@ function MobileServiceCard({ children, className = '', direction = 'bottom', bor
       }}
       className={`h-full ${className}`}
     >
-      <AnimatedBorderCard initialDirection={borderStart} simplified>
+      <StaticCard>
         {children}
-      </AnimatedBorderCard>
+      </StaticCard>
     </motion.div>
   );
 }
 
 // Desktop card with full spring animations
-function DesktopServiceCard({ children, className = '', direction = 'bottom', borderStart = 'TOP' }: ServiceCardProps) {
+function DesktopServiceCard({ children, className = '', direction = 'bottom' }: ServiceCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -112,7 +128,7 @@ function DesktopServiceCard({ children, className = '', direction = 'bottom', bo
       }}
       className={`h-full ${className}`}
     >
-      <AnimatedBorderCard initialDirection={borderStart}>{children}</AnimatedBorderCard>
+      <StaticCard>{children}</StaticCard>
     </motion.div>
   );
 }
