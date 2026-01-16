@@ -46,7 +46,7 @@ function ConnectedNodes() {
     let nodes: Node[] = [];
     let isPaused = false;
     const connectionDistance = 160;
-    const nodeCount = 55;
+    const nodeCount = 60;
 
     const getCanvasDimensions = () => {
       const parent = canvas.parentElement;
@@ -131,7 +131,7 @@ function ConnectedNodes() {
 
           if (distSq < connectionDistance * connectionDistance) {
             const opacity = (1 - Math.sqrt(distSq) / connectionDistance) * 0.35;
-            ctx.strokeStyle = `rgba(130, 130, 130, ${opacity})`;
+            ctx.strokeStyle = `rgba(0, 0, 0, ${opacity * 1.5})`;
             ctx.beginPath();
             ctx.moveTo(nodes[i].x, nodes[i].y);
             ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -147,7 +147,7 @@ function ConnectedNodes() {
         // Draw outer lighter ring first
         ctx.beginPath();
         ctx.arc(node.x, node.y, radius * 2, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${node.color.rgb}, ${node.color.opacity * 0.25})`;
+        ctx.fillStyle = `rgba(${node.color.rgb}, 0.10)`;
         ctx.fill();
 
         // Draw inner solid circle
