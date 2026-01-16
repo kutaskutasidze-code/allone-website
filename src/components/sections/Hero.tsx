@@ -541,15 +541,15 @@ export function Hero() {
                     `}
                   />
 
-                  {/* Send button - only shows when typing */}
+                  {/* Send button - always visible when chat active */}
                   <button
                     onClick={(e) => { e.stopPropagation(); sendMessage(); }}
                     disabled={isLoading || !input.trim()}
                     className={`
                       absolute right-4 top-1/2 -translate-y-1/2
                       transition-all duration-200
-                      ${isChatActive && input.trim()
-                        ? 'opacity-100 text-black hover:text-black/70'
+                      ${isChatActive
+                        ? 'opacity-100 text-black hover:text-black/70 disabled:opacity-40'
                         : 'opacity-0 pointer-events-none'}
                     `}
                   >
@@ -559,15 +559,15 @@ export function Hero() {
               </div>
             </div>
 
-            {/* Close button - inside on mobile, outside on desktop */}
+            {/* Close button - below on mobile, outside on desktop */}
             <button
               onClick={closeChat}
               className={`
-                absolute top-1/2 -translate-y-1/2 z-20
+                absolute z-20
                 p-2 rounded-full
                 text-black hover:text-black/70 hover:bg-black/5
                 transition-all duration-300
-                right-2 sm:right-auto sm:left-full sm:ml-3
+                top-full mt-3 left-1/2 -translate-x-1/2 sm:mt-0 sm:top-1/2 sm:-translate-y-1/2 sm:translate-x-0 sm:left-full sm:ml-2
                 ${isChatActive ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}
               `}
               aria-label="Close chat"
