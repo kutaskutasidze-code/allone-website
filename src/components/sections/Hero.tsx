@@ -237,8 +237,15 @@ export function Hero() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
+  const [shaderReady, setShaderReady] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  // Wait for shader to initialize before showing button
+  useEffect(() => {
+    const timer = setTimeout(() => setShaderReady(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const openChat = useCallback(() => {
     setIsChatActive(true);
@@ -435,8 +442,8 @@ export function Hero() {
           {/* Ask AI - Button that expands into input */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
+            animate={shaderReady ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.8, delay: shaderReady ? 0.9 : 0 }}
             className="relative flex justify-center items-center"
           >
             {/* PulsingBorder container - entire area is clickable */}
@@ -552,14 +559,15 @@ export function Hero() {
               </div>
             </div>
 
-            {/* Close button - positioned absolutely to not affect centering */}
+            {/* Close button - inside on mobile, outside on desktop */}
             <button
               onClick={closeChat}
               className={`
-                absolute left-full ml-3 top-1/2 -translate-y-1/2
+                absolute top-1/2 -translate-y-1/2
                 p-2 rounded-full
                 text-black hover:text-black/70 hover:bg-black/5
                 transition-all duration-300
+                right-2 sm:right-auto sm:left-full sm:ml-3
                 ${isChatActive ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}
               `}
               aria-label="Close chat"
