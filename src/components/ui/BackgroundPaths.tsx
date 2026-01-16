@@ -82,8 +82,8 @@ const FloatingPaths = memo(function FloatingPaths({
       Array.from({ length: 12 }, (_, i) => ({
         id: generateUniqueId('primary'),
         d: generateAestheticPath(i, position, 'primary'),
-        opacity: 0.35 + i * 0.03,
-        width: 1.5 + i * 0.15,
+        opacity: 0.7 + i * 0.02,
+        width: 2 + i * 0.2,
       })),
     [position]
   );
@@ -93,8 +93,8 @@ const FloatingPaths = memo(function FloatingPaths({
       Array.from({ length: 15 }, (_, i) => ({
         id: generateUniqueId('secondary'),
         d: generateAestheticPath(i, position, 'secondary'),
-        opacity: 0.28 + i * 0.02,
-        width: 1.2 + i * 0.12,
+        opacity: 0.6 + i * 0.025,
+        width: 1.8 + i * 0.18,
       })),
     [position]
   );
@@ -104,8 +104,8 @@ const FloatingPaths = memo(function FloatingPaths({
       Array.from({ length: 10 }, (_, i) => ({
         id: generateUniqueId('accent'),
         d: generateAestheticPath(i, position, 'accent'),
-        opacity: 0.2 + i * 0.015,
-        width: 1 + i * 0.1,
+        opacity: 0.5 + i * 0.02,
+        width: 1.5 + i * 0.15,
       })),
     [position]
   );
@@ -133,11 +133,11 @@ const FloatingPaths = memo(function FloatingPaths({
         <title>Background Paths</title>
         <defs>
           <linearGradient id="pathGradient" x1="0%" x2="100%" y1="0%" y2="0%">
-            <stop offset="0%" stopColor="rgba(61, 90, 128, 0.35)" />
-            <stop offset="25%" stopColor="rgba(80, 100, 130, 0.28)" />
-            <stop offset="50%" stopColor="rgba(100, 115, 140, 0.22)" />
-            <stop offset="75%" stopColor="rgba(80, 100, 130, 0.28)" />
-            <stop offset="100%" stopColor="rgba(61, 90, 128, 0.35)" />
+            <stop offset="0%" stopColor="rgba(61, 90, 128, 0.85)" />
+            <stop offset="25%" stopColor="rgba(80, 100, 130, 0.75)" />
+            <stop offset="50%" stopColor="rgba(100, 115, 140, 0.65)" />
+            <stop offset="75%" stopColor="rgba(80, 100, 130, 0.75)" />
+            <stop offset="100%" stopColor="rgba(61, 90, 128, 0.85)" />
           </linearGradient>
         </defs>
 
