@@ -140,23 +140,22 @@ function ConnectedNodes() {
         }
       }
 
-      const pulse = Math.sin(time * 0.001) * 0.15 + 1;
       for (let i = 0; i < nodes.length; i++) {
         const node = nodes[i];
-        const radius = node.radius * pulse;
+        const radius = node.radius;
 
-        // Add glow effect
-        ctx.shadowBlur = radius * 4;
-        ctx.shadowColor = `rgba(${node.color.rgb}, 0.5)`;
+        // Draw outer lighter ring first
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, radius * 2, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${node.color.rgb}, ${node.color.opacity * 0.25})`;
+        ctx.fill();
 
+        // Draw inner solid circle
         ctx.beginPath();
         ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(${node.color.rgb}, ${node.color.opacity})`;
         ctx.fill();
       }
-
-      // Reset shadow for next frame
-      ctx.shadowBlur = 0;
 
       animationFrameId = requestAnimationFrame(animate);
     };
