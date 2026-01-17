@@ -14,6 +14,10 @@ import {
   ChevronLeft,
   Menu,
   X,
+  Mail,
+  BarChart3,
+  Database,
+  FileText,
 } from 'lucide-react';
 
 const navigationSections = [
@@ -21,12 +25,21 @@ const navigationSections = [
     label: 'Overview',
     items: [
       { name: 'Dashboard', href: '/sales', icon: LayoutDashboard },
+      { name: 'Analytics', href: '/sales/analytics', icon: BarChart3 },
     ],
   },
   {
     label: 'Sales',
     items: [
       { name: 'Leads', href: '/sales/leads', icon: Users },
+      { name: 'Campaigns', href: '/sales/campaigns', icon: Mail },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { name: 'Sources', href: '/sales/sources', icon: Database },
+      { name: 'Templates', href: '/sales/templates', icon: FileText },
     ],
   },
 ];

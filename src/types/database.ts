@@ -321,6 +321,27 @@ export interface Database {
           value: number;
           source: string | null;
           notes: string | null;
+          // Extended fields for lead generation
+          company_name_local: string | null;
+          website: string | null;
+          industry: string | null;
+          company_size: 'small' | 'medium' | 'large' | 'enterprise' | null;
+          description: string | null;
+          address: string | null;
+          city: string | null;
+          country: string | null;
+          linkedin_url: string | null;
+          facebook_url: string | null;
+          instagram_url: string | null;
+          matched_service: 'chatbots' | 'custom_ai' | 'automation' | 'website' | 'consulting' | null;
+          relevance_score: number;
+          tags: string[];
+          source_id: string | null;
+          source_url: string | null;
+          email_sent_at: string | null;
+          email_opened_at: string | null;
+          email_replied_at: string | null;
+          is_scraped: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -335,6 +356,26 @@ export interface Database {
           value?: number;
           source?: string | null;
           notes?: string | null;
+          company_name_local?: string | null;
+          website?: string | null;
+          industry?: string | null;
+          company_size?: 'small' | 'medium' | 'large' | 'enterprise' | null;
+          description?: string | null;
+          address?: string | null;
+          city?: string | null;
+          country?: string | null;
+          linkedin_url?: string | null;
+          facebook_url?: string | null;
+          instagram_url?: string | null;
+          matched_service?: 'chatbots' | 'custom_ai' | 'automation' | 'website' | 'consulting' | null;
+          relevance_score?: number;
+          tags?: string[];
+          source_id?: string | null;
+          source_url?: string | null;
+          email_sent_at?: string | null;
+          email_opened_at?: string | null;
+          email_replied_at?: string | null;
+          is_scraped?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -349,8 +390,325 @@ export interface Database {
           value?: number;
           source?: string | null;
           notes?: string | null;
+          company_name_local?: string | null;
+          website?: string | null;
+          industry?: string | null;
+          company_size?: 'small' | 'medium' | 'large' | 'enterprise' | null;
+          description?: string | null;
+          address?: string | null;
+          city?: string | null;
+          country?: string | null;
+          linkedin_url?: string | null;
+          facebook_url?: string | null;
+          instagram_url?: string | null;
+          matched_service?: 'chatbots' | 'custom_ai' | 'automation' | 'website' | 'consulting' | null;
+          relevance_score?: number;
+          tags?: string[];
+          source_id?: string | null;
+          source_url?: string | null;
+          email_sent_at?: string | null;
+          email_opened_at?: string | null;
+          email_replied_at?: string | null;
+          is_scraped?: boolean;
           created_at?: string;
           updated_at?: string;
+        };
+      };
+      lead_sources: {
+        Row: {
+          id: string;
+          name: string;
+          source_type: 'maps' | 'directory' | 'jobs' | 'registry' | 'search' | 'manual';
+          base_url: string;
+          countries: string[];
+          is_active: boolean;
+          scrape_config: Record<string, unknown>;
+          last_scraped_at: string | null;
+          leads_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          source_type: 'maps' | 'directory' | 'jobs' | 'registry' | 'search' | 'manual';
+          base_url: string;
+          countries?: string[];
+          is_active?: boolean;
+          scrape_config?: Record<string, unknown>;
+          last_scraped_at?: string | null;
+          leads_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          source_type?: 'maps' | 'directory' | 'jobs' | 'registry' | 'search' | 'manual';
+          base_url?: string;
+          countries?: string[];
+          is_active?: boolean;
+          scrape_config?: Record<string, unknown>;
+          last_scraped_at?: string | null;
+          leads_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      scrape_jobs: {
+        Row: {
+          id: string;
+          source_id: string | null;
+          status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+          search_query: string | null;
+          country: string | null;
+          city: string | null;
+          leads_found: number;
+          leads_new: number;
+          leads_duplicate: number;
+          leads_enriched: number;
+          error_message: string | null;
+          metadata: Record<string, unknown>;
+          started_at: string | null;
+          completed_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          source_id?: string | null;
+          status?: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+          search_query?: string | null;
+          country?: string | null;
+          city?: string | null;
+          leads_found?: number;
+          leads_new?: number;
+          leads_duplicate?: number;
+          leads_enriched?: number;
+          error_message?: string | null;
+          metadata?: Record<string, unknown>;
+          started_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          source_id?: string | null;
+          status?: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+          search_query?: string | null;
+          country?: string | null;
+          city?: string | null;
+          leads_found?: number;
+          leads_new?: number;
+          leads_duplicate?: number;
+          leads_enriched?: number;
+          error_message?: string | null;
+          metadata?: Record<string, unknown>;
+          started_at?: string | null;
+          completed_at?: string | null;
+          created_at?: string;
+        };
+      };
+      email_campaigns: {
+        Row: {
+          id: string;
+          name: string;
+          subject: string;
+          body_template: string;
+          target_service: 'chatbots' | 'custom_ai' | 'automation' | 'website' | 'consulting' | null;
+          target_countries: string[];
+          min_relevance_score: number;
+          is_active: boolean;
+          emails_sent: number;
+          emails_delivered: number;
+          emails_opened: number;
+          emails_clicked: number;
+          emails_replied: number;
+          emails_bounced: number;
+          daily_limit: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          subject: string;
+          body_template: string;
+          target_service?: 'chatbots' | 'custom_ai' | 'automation' | 'website' | 'consulting' | null;
+          target_countries?: string[];
+          min_relevance_score?: number;
+          is_active?: boolean;
+          emails_sent?: number;
+          emails_delivered?: number;
+          emails_opened?: number;
+          emails_clicked?: number;
+          emails_replied?: number;
+          emails_bounced?: number;
+          daily_limit?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          subject?: string;
+          body_template?: string;
+          target_service?: 'chatbots' | 'custom_ai' | 'automation' | 'website' | 'consulting' | null;
+          target_countries?: string[];
+          min_relevance_score?: number;
+          is_active?: boolean;
+          emails_sent?: number;
+          emails_delivered?: number;
+          emails_opened?: number;
+          emails_clicked?: number;
+          emails_replied?: number;
+          emails_bounced?: number;
+          daily_limit?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      email_logs: {
+        Row: {
+          id: string;
+          lead_id: string | null;
+          campaign_id: string | null;
+          email_provider_id: string | null;
+          to_email: string;
+          subject: string;
+          status: 'queued' | 'sending' | 'sent' | 'delivered' | 'opened' | 'clicked' | 'replied' | 'bounced' | 'failed' | 'unsubscribed';
+          sent_at: string | null;
+          delivered_at: string | null;
+          opened_at: string | null;
+          clicked_at: string | null;
+          replied_at: string | null;
+          bounced_at: string | null;
+          error_message: string | null;
+          metadata: Record<string, unknown>;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          lead_id?: string | null;
+          campaign_id?: string | null;
+          email_provider_id?: string | null;
+          to_email: string;
+          subject: string;
+          status?: 'queued' | 'sending' | 'sent' | 'delivered' | 'opened' | 'clicked' | 'replied' | 'bounced' | 'failed' | 'unsubscribed';
+          sent_at?: string | null;
+          delivered_at?: string | null;
+          opened_at?: string | null;
+          clicked_at?: string | null;
+          replied_at?: string | null;
+          bounced_at?: string | null;
+          error_message?: string | null;
+          metadata?: Record<string, unknown>;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          lead_id?: string | null;
+          campaign_id?: string | null;
+          email_provider_id?: string | null;
+          to_email?: string;
+          subject?: string;
+          status?: 'queued' | 'sending' | 'sent' | 'delivered' | 'opened' | 'clicked' | 'replied' | 'bounced' | 'failed' | 'unsubscribed';
+          sent_at?: string | null;
+          delivered_at?: string | null;
+          opened_at?: string | null;
+          clicked_at?: string | null;
+          replied_at?: string | null;
+          bounced_at?: string | null;
+          error_message?: string | null;
+          metadata?: Record<string, unknown>;
+          created_at?: string;
+        };
+      };
+      email_templates: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          subject: string;
+          body: string;
+          target_service: 'chatbots' | 'custom_ai' | 'automation' | 'website' | 'consulting' | 'general' | null;
+          language: string;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          subject: string;
+          body: string;
+          target_service?: 'chatbots' | 'custom_ai' | 'automation' | 'website' | 'consulting' | 'general' | null;
+          language?: string;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          subject?: string;
+          body?: string;
+          target_service?: 'chatbots' | 'custom_ai' | 'automation' | 'website' | 'consulting' | 'general' | null;
+          language?: string;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      lead_analytics: {
+        Row: {
+          id: string;
+          date: string;
+          leads_scraped: number;
+          leads_enriched: number;
+          leads_with_email: number;
+          leads_with_phone: number;
+          emails_sent: number;
+          emails_opened: number;
+          emails_replied: number;
+          scrape_jobs_run: number;
+          scrape_jobs_failed: number;
+          top_source_id: string | null;
+          top_country: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          date: string;
+          leads_scraped?: number;
+          leads_enriched?: number;
+          leads_with_email?: number;
+          leads_with_phone?: number;
+          emails_sent?: number;
+          emails_opened?: number;
+          emails_replied?: number;
+          scrape_jobs_run?: number;
+          scrape_jobs_failed?: number;
+          top_source_id?: string | null;
+          top_country?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          date?: string;
+          leads_scraped?: number;
+          leads_enriched?: number;
+          leads_with_email?: number;
+          leads_with_phone?: number;
+          emails_sent?: number;
+          emails_opened?: number;
+          emails_replied?: number;
+          scrape_jobs_run?: number;
+          scrape_jobs_failed?: number;
+          top_source_id?: string | null;
+          top_country?: string | null;
+          created_at?: string;
         };
       };
     };
@@ -408,8 +766,72 @@ export type LeadInsert = Database['public']['Tables']['leads']['Insert'];
 export type LeadUpdate = Database['public']['Tables']['leads']['Update'];
 
 export type LeadStatus = Lead['status'];
+export type MatchedService = Lead['matched_service'];
+export type CompanySize = Lead['company_size'];
 
 // Lead with sales user info for admin view
 export interface LeadWithSalesUser extends Lead {
   sales_user?: SalesUser | null;
 }
+
+// Lead Generation Types
+export type LeadSource = Database['public']['Tables']['lead_sources']['Row'];
+export type LeadSourceInsert = Database['public']['Tables']['lead_sources']['Insert'];
+export type LeadSourceUpdate = Database['public']['Tables']['lead_sources']['Update'];
+export type LeadSourceType = LeadSource['source_type'];
+
+export type ScrapeJob = Database['public']['Tables']['scrape_jobs']['Row'];
+export type ScrapeJobInsert = Database['public']['Tables']['scrape_jobs']['Insert'];
+export type ScrapeJobUpdate = Database['public']['Tables']['scrape_jobs']['Update'];
+export type ScrapeJobStatus = ScrapeJob['status'];
+
+export type EmailCampaign = Database['public']['Tables']['email_campaigns']['Row'];
+export type EmailCampaignInsert = Database['public']['Tables']['email_campaigns']['Insert'];
+export type EmailCampaignUpdate = Database['public']['Tables']['email_campaigns']['Update'];
+
+export type EmailLog = Database['public']['Tables']['email_logs']['Row'];
+export type EmailLogInsert = Database['public']['Tables']['email_logs']['Insert'];
+export type EmailLogUpdate = Database['public']['Tables']['email_logs']['Update'];
+export type EmailStatus = EmailLog['status'];
+
+export type EmailTemplate = Database['public']['Tables']['email_templates']['Row'];
+export type EmailTemplateInsert = Database['public']['Tables']['email_templates']['Insert'];
+export type EmailTemplateUpdate = Database['public']['Tables']['email_templates']['Update'];
+
+export type LeadAnalytics = Database['public']['Tables']['lead_analytics']['Row'];
+export type LeadAnalyticsInsert = Database['public']['Tables']['lead_analytics']['Insert'];
+export type LeadAnalyticsUpdate = Database['public']['Tables']['lead_analytics']['Update'];
+
+// Extended types with relations
+export interface LeadWithSource extends Lead {
+  lead_source?: LeadSource | null;
+}
+
+export interface EmailLogWithRelations extends EmailLog {
+  lead?: Lead | null;
+  campaign?: EmailCampaign | null;
+}
+
+export interface ScrapeJobWithSource extends ScrapeJob {
+  lead_source?: LeadSource | null;
+}
+
+// Country codes used in lead generation
+export type CountryCode = 'KZ' | 'UZ' | 'GE' | 'TR' | 'AM' | 'AZ';
+
+export const COUNTRY_NAMES: Record<CountryCode, string> = {
+  KZ: 'Kazakhstan',
+  UZ: 'Uzbekistan',
+  GE: 'Georgia',
+  TR: 'Turkey',
+  AM: 'Armenia',
+  AZ: 'Azerbaijan',
+};
+
+export const SERVICE_NAMES: Record<NonNullable<MatchedService>, string> = {
+  chatbots: 'AI Chatbots',
+  custom_ai: 'Custom AI Solutions',
+  automation: 'Workflow Automation',
+  website: 'Website Development',
+  consulting: 'AI Consulting',
+};
