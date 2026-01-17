@@ -207,7 +207,6 @@ const MessagesList = memo(function MessagesList({
   messagesContainerRef,
   messagesEndRef,
   onScroll,
-  onWheel,
   onTouchMove,
 }: {
   messages: Message[];
@@ -216,14 +215,12 @@ const MessagesList = memo(function MessagesList({
   messagesContainerRef: React.RefObject<HTMLDivElement | null>;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   onScroll: () => void;
-  onWheel: (e: React.WheelEvent<HTMLDivElement>) => void;
   onTouchMove: (e: React.TouchEvent) => void;
 }) {
   return (
     <div
       ref={messagesContainerRef}
       onScroll={onScroll}
-      onWheel={onWheel}
       onTouchMove={onTouchMove}
       className="flex-1 min-h-0 overflow-y-scroll p-5 space-y-4"
       style={{
@@ -314,16 +311,23 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
     lastScrollTopRef.current = scrollTop;
   }, []);
 
-  const handleWheel = useCallback((e: React.WheelEvent<HTMLDivElement>) => {
-    e.stopPropagation();
+  // Use native event listener for wheel to ensure non-passive (Windows fix)
+  useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
 
-    const { scrollTop, scrollHeight, clientHeight } = container;
-    const maxScroll = scrollHeight - clientHeight;
-    let newScrollTop = Math.max(0, Math.min(scrollTop + e.deltaY, maxScroll));
-    container.scrollTop = newScrollTop;
-    e.preventDefault();
+    const handleWheel = (e: WheelEvent) => {
+      e.stopPropagation();
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      const maxScroll = scrollHeight - clientHeight;
+      const newScrollTop = Math.max(0, Math.min(scrollTop + e.deltaY, maxScroll));
+      container.scrollTop = newScrollTop;
+      e.preventDefault();
+    };
+
+    // Add with { passive: false } to allow preventDefault
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
   }, []);
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
@@ -504,7 +508,6 @@ export function ChatModal({ isOpen, onClose }: ChatModalProps) {
               messagesContainerRef={messagesContainerRef}
               messagesEndRef={messagesEndRef}
               onScroll={handleScroll}
-              onWheel={handleWheel}
               onTouchMove={handleTouchMove}
             />
 
