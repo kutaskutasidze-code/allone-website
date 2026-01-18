@@ -7,7 +7,7 @@ export const config = {
   },
   resend: {
     apiKey: process.env.RESEND_API_KEY || '',
-    fromEmail: process.env.RESEND_FROM_EMAIL || 'sales@allone.ge',
+    fromEmail: process.env.RESEND_FROM_EMAIL || 'info@allone.ge',
     fromName: process.env.RESEND_FROM_NAME || 'Allone',
   },
   groq: {
