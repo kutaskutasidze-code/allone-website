@@ -56,7 +56,7 @@ async function runEmailCron() {
     logger.info(`Found ${leads.length} leads to email`);
 
     for (const lead of leads) {
-      if (!lead.email) continue;
+      if (!lead.email || !lead.id) continue;
 
       try {
         // Personalize the email
@@ -73,12 +73,12 @@ async function runEmailCron() {
           lead.email,
           personalized.subject,
           personalized.body,
-          (lead as { id: string }).id,
+          lead.id,
           campaign.id
         );
 
         if (result.success) {
-          await markLeadEmailed((lead as { id: string }).id);
+          await markLeadEmailed(lead.id);
           totalSent++;
           logger.info(`Email sent to ${lead.email} (${totalSent}/${remaining})`);
         } else {

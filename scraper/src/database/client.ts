@@ -25,6 +25,7 @@ export function getSupabase(): SupabaseClient {
 
 // Lead types
 export interface LeadData {
+  id?: string;
   name: string;
   company?: string;
   company_name_local?: string;
